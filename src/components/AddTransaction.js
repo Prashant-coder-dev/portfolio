@@ -1,0 +1,435 @@
+import React, { useState, useEffect } from 'react';
+
+function AddTransaction({ onAddTransaction, transactions, holdings }) {
+  const [company, setCompany] = useState('');
+  const [date, setDate] = useState('');
+  const [type, setType] = useState('Buy'); // Default to 'Buy'
+  const [transactionSource, setTransactionSource] = useState('Secondary'); // Default to 'Secondary' for Buy
+  const [holdingType, setHoldingType] = useState('Short Term'); // Default for Sell
+  const [quantity, setQuantity] = useState('');
+  const [price, setPrice] = useState(''); // This will be Buy Price for 'Buy' or Sell Price for 'Sell'
+  const [fees, setFees] = useState('0'); // This will be used for Sell transactions, or if there are additional fees
+
+  // Calculated states (for both Buy and Sell, some only apply to one)
+  const [initialInvestment, setInitialInvestment] = useState(0); // For Buy
+  const [initialSellingAmount, setInitialSellingAmount] = useState(0); // For Sell
+  const [brokerCommission, setBrokerCommission] = useState(0);
+  const [sebonFee, setSebonFee] = useState(0);
+  const [dpCharge, setDpCharge] = useState(0);
+  const [totalCommission, setTotalCommission] = useState(0);
+  const [amountPayable, setAmountPayable] = useState(0); // For Buy
+  // const [wacc, setWacc] = useState(0); // WACC will be derived from holdings for Sell
+  const [investment, setInvestment] = useState(0); // For Sell (Quantity * WACC)
+  const [profitBeforeTax, setProfitBeforeTax] = useState(0); // For Sell
+  const [capitalGainTax, setCapitalGainTax] = useState(0); // For Sell
+  const [netProfitLoss, setNetProfitLoss] = useState(0); // For Sell
+  const [netProfitLossPercentage, setNetProfitLossPercentage] = useState(0); // For Sell
+  const [amountReceivable, setAmountReceivable] = useState(0); // For Sell
+
+    // State to hold the fetched WACC for the selected company when type is Sell
+    const [fetchedWacc, setFetchedWacc] = useState(0);
+
+
+  // Transaction Sources (Used for Buy and Sell Secondary)
+  const transactionSources = [
+    'IPO',
+    'FPO',
+    'Right',
+    'Bonus Share',
+    'Secondary',
+  ];
+
+  // Holding Types for Sell
+  const holdingTypes = [
+    { label: 'Short Term (Less than one year 7.5%)', value: 'Short Term' },
+    { label: 'Long Term (More than one year 5%)', value: 'Long Term' },
+  ];
+
+
+  // Effect to find WACC from holdings when company or holdings change for Sell transactions
+  useEffect(() => {
+      if(type === 'Sell') {
+          const holdingForCompany = holdings.find(h => h.company === company);
+          if(holdingForCompany) {
+              setFetchedWacc(holdingForCompany.wacc);
+          } else {
+              setFetchedWacc(0); // Reset if no holding found for company
+          }
+      }
+  }, [company, holdings, type]); // Rerun when company, holdings, or type changes
+
+
+  // Effect to calculate details when relevant inputs change
+  useEffect(() => {
+    const qty = parseFloat(quantity) || 0;
+    const currentPrice = parseFloat(price) || 0; // Use 'price' state for both Buy/Sell price
+
+    let calculatedInitialInvestment = 0; // For Buy
+    let calculatedInitialSellingAmount = 0; // For Sell
+    let calculatedBrokerCommission = 0;
+    let calculatedSebonFee = 0;
+    let calculatedDpCharge = 0;
+    let calculatedTotalCommission = 0;
+    let calculatedAmountPayable = 0; // For Buy
+    let calculatedInvestment = 0; // For Sell
+    let calculatedProfitBeforeTax = 0; // For Sell
+    let calculatedCapitalGainTax = 0; // For Sell
+    let calculatedNetProfitLoss = 0; // For Sell
+    let calculatedNetProfitLossPercentage = 0; // For Sell
+    let calculatedAmountReceivable = 0; // For Sell
+
+
+    if (type === 'Buy') {
+      calculatedInitialInvestment = qty * currentPrice;
+
+      // Broker Commission Calculation (Buy - Secondary)
+      if (transactionSource === 'Secondary') {
+        if (calculatedInitialInvestment < 2500) {
+          calculatedBrokerCommission = 10;
+        } else if (calculatedInitialInvestment <= 50000) {
+          calculatedBrokerCommission = calculatedInitialInvestment * 0.0036;
+        } else if (calculatedInitialInvestment <= 500000) {
+          calculatedBrokerCommission = calculatedInitialInvestment * 0.0033;
+        } else if (calculatedInitialInvestment <= 2000000) {
+          calculatedBrokerCommission = calculatedInitialInvestment * 0.0031;
+        } else if (calculatedInitialInvestment <= 10000000) {
+          calculatedBrokerCommission = calculatedInitialInvestment * 0.0027;
+        } else {
+          calculatedBrokerCommission = calculatedInitialInvestment * 0.0024;
+        }
+      }
+
+      // SEBON Fee Calculation (Buy - Secondary)
+      if (transactionSource === 'Secondary') {
+        calculatedSebonFee = calculatedInitialInvestment * 0.00015;
+      }
+
+      // DP Charge Calculation (Buy - Secondary)
+      if (transactionSource === 'Secondary' && qty > 0) {
+         calculatedDpCharge = 25;
+      }
+
+      calculatedTotalCommission = calculatedBrokerCommission + calculatedSebonFee + calculatedDpCharge;
+      calculatedAmountPayable = calculatedInitialInvestment + calculatedTotalCommission;
+
+    } else if (type === 'Sell') { // Calculations for Sell Transaction
+        calculatedInitialSellingAmount = qty * currentPrice;
+
+        // Use the fetchedWacc for Investment calculation
+        calculatedInvestment = qty * fetchedWacc;
+
+        // Broker Commission Calculation (Sell - Secondary) - based on Initial Selling Amount
+         if (qty > 0) {
+             if (calculatedInitialSellingAmount < 2500) {
+               calculatedBrokerCommission = 10;
+             } else if (calculatedInitialSellingAmount <= 50000) {
+               calculatedBrokerCommission = calculatedInitialSellingAmount * 0.0036;
+             } else if (calculatedInitialSellingAmount <= 500000) {
+               calculatedBrokerCommission = calculatedInitialSellingAmount * 0.0033;
+             } else if (calculatedInitialSellingAmount <= 2000000) {
+               calculatedBrokerCommission = calculatedInitialSellingAmount * 0.0031;
+             } else if (calculatedInitialSellingAmount <= 10000000) {
+               calculatedBrokerCommission = calculatedInitialSellingAmount * 0.0027;
+             } else {
+               calculatedBrokerCommission = calculatedInitialSellingAmount * 0.0024;
+             }
+         } else {
+             calculatedBrokerCommission = 0;
+         }
+
+        // SEBON Fee Calculation (Sell - Secondary) - based on Initial Selling Amount
+        if (qty > 0) {
+            calculatedSebonFee = calculatedInitialSellingAmount * 0.00015;
+        } else {
+            calculatedSebonFee = 0;
+        }
+
+        // DP Charge Calculation (Sell) - based on Quantity
+        if (qty > 0) {
+            calculatedDpCharge = 25;
+        } else {
+            calculatedDpCharge = 0;
+        }
+
+        calculatedTotalCommission = calculatedBrokerCommission + calculatedSebonFee + calculatedDpCharge;
+
+        calculatedProfitBeforeTax = calculatedInitialSellingAmount - calculatedInvestment - calculatedTotalCommission;
+
+        // Capital Gain Tax Calculation
+        if (calculatedProfitBeforeTax > 0) {
+            if (holdingType === 'Short Term') {
+                calculatedCapitalGainTax = calculatedProfitBeforeTax * 0.075; // 7.5%
+            } else { // Long Term
+                calculatedCapitalGainTax = calculatedProfitBeforeTax * 0.05; // 5%
+            }
+        } else {
+            calculatedCapitalGainTax = 0;
+        }
+
+        calculatedNetProfitLoss = calculatedProfitBeforeTax - calculatedCapitalGainTax;
+
+        if (calculatedInvestment > 0) {
+             calculatedNetProfitLossPercentage = (calculatedNetProfitLoss / calculatedInvestment) * 100;
+        } else {
+            calculatedNetProfitLossPercentage = 0; // Avoid division by zero
+        }
+
+
+         calculatedAmountReceivable = calculatedInitialSellingAmount - calculatedTotalCommission;
+
+    }
+
+    // Update states with calculated values
+    setInitialInvestment(calculatedInitialInvestment);
+    setInitialSellingAmount(calculatedInitialSellingAmount);
+    setBrokerCommission(calculatedBrokerCommission);
+    setSebonFee(calculatedSebonFee);
+    setDpCharge(calculatedDpCharge);
+    setTotalCommission(calculatedTotalCommission);
+    setAmountPayable(calculatedAmountPayable);
+    // setWacc is no longer needed here as WACC for Sell is fetched
+    setInvestment(calculatedInvestment);
+    setProfitBeforeTax(calculatedProfitBeforeTax);
+    setCapitalGainTax(calculatedCapitalGainTax);
+    setNetProfitLoss(calculatedNetProfitLoss);
+    setNetProfitLossPercentage(calculatedNetProfitLossPercentage);
+    setAmountReceivable(calculatedAmountReceivable);
+
+  }, [quantity, price, type, transactionSource, holdingType, company, fetchedWacc]); // Rerun when these or fetchedWacc changes
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Basic validation (you can add more comprehensive validation)
+    if (!company || !date || !quantity || !price) {
+      alert('Please fill in all required fields (Company Symbol, Transaction Date, Share Quantity, Price).');
+      return;
+    }
+
+    // Validation for Sell specific fields
+    if (type === 'Sell') {
+        if (!holdingType) {
+             alert('Please select Holding Type for Sell transactions.');
+             return;
+        }
+        if (fetchedWacc === 0) {
+             alert('Cannot sell. No Buy transactions found for this company to calculate WACC.');
+             return;
+         }
+         // Add validation to ensure selling quantity does not exceed holding quantity
+          const holdingForCompany = holdings.find(h => h.company === company);
+          if (!holdingForCompany || holdingForCompany.totalQuantity < parseFloat(quantity)) {
+              alert('Selling quantity exceeds available holdings for this company.');
+              return;
+          }
+    }
+
+
+    const newTransaction = {
+      company: company.trim(),
+      date,
+      type,
+      quantity: parseFloat(quantity),
+      price: parseFloat(price), // This is the Buy Price for 'Buy' or Sell Price for 'Sell'
+      timestamp: new Date().toISOString(),
+      // Include calculated values based on type
+      initialInvestment: type === 'Buy' ? initialInvestment : 0,
+      transactionSource: type === 'Buy' ? transactionSource : 'Secondary', // Source is always Secondary for Sell
+      amountPayable: type === 'Buy' ? amountPayable : 0,
+      wacc: fetchedWacc, // Use the fetched WACC for both Buy (will be 0) and Sell
+      initialSellingAmount: type === 'Sell' ? initialSellingAmount : 0,
+      holdingType: type === 'Sell' ? holdingType : '',
+      investment: type === 'Sell' ? investment : 0,
+      brokerCommission: brokerCommission, // Use calculated commission for both Buy/Sell
+      sebonFee: sebonFee, // Use calculated SEBON fee for both Buy/Sell
+      dpCharge: dpCharge, // Use calculated DP charge for both Buy/Sell
+      totalCommission: totalCommission, // Use calculated total commission for both Buy/Sell
+      profitBeforeTax: type === 'Sell' ? profitBeforeTax : 0,
+      capitalGainTax: type === 'Sell' ? capitalGainTax : 0,
+      netProfitLoss: type === 'Sell' ? netProfitLoss : 0,
+      netProfitLossPercentage: type === 'Sell' ? netProfitLossPercentage : 0,
+      amountReceivable: type === 'Sell' ? amountReceivable : 0,
+       // Note: Fees field is removed as per previous request
+    };
+
+    onAddTransaction(newTransaction);
+
+    // Clear the form and reset states
+    setCompany('');
+    setDate('');
+    setType('Buy');
+    setTransactionSource('Secondary');
+    setHoldingType('Short Term');
+    setQuantity('');
+    setPrice('');
+    setInitialInvestment(0);
+    setInitialSellingAmount(0);
+    setBrokerCommission(0);
+    setSebonFee(0);
+    setDpCharge(0);
+    setTotalCommission(0);
+    setAmountPayable(0);
+    setFetchedWacc(0); // Reset fetchedWacc
+    setInvestment(0);
+    setProfitBeforeTax(0);
+    setCapitalGainTax(0);
+    setNetProfitLoss(0);
+    setNetProfitLossPercentage(0);
+    setAmountReceivable(0);
+  };
+
+  return (
+    <div>
+      <h2>Add New Transaction</h2>
+      <form onSubmit={handleSubmit}>
+        <div style={{ display: 'flex', gap: '20px' }}>
+          {/* Input Fields Section */}
+          <div style={{ flex: 1 }}>
+            <div>
+              <label htmlFor="company">Company Symbol:</label>
+              <input
+                type="text"
+                id="company"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="date">Transaction Date:</label>
+              <input
+                type="date"
+                id="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="type">Transaction Type:</label>
+              <select id="type" value={type} onChange={(e) => setType(e.target.value)}>
+                <option value="Buy">Buy</option>
+                <option value="Sell">Sell</option>
+              </select>
+            </div>
+            {type === 'Buy' && (
+              <div>
+                <label htmlFor="transactionSource">Transaction Source:</label>
+                <select
+                  id="transactionSource"
+                  value={transactionSource}
+                  onChange={(e) => setTransactionSource(e.target.value)}
+                >
+                  {transactionSources.map((source) => (
+                    <option key={source} value={source}>{source}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+             {type === 'Sell' && (
+              <div>
+                <label htmlFor="transactionSource">Transaction Source:</label>
+                 {/* Transaction Source is always Secondary for Sell */}
+                <input type="text" id="transactionSource" value="Secondary" disabled />
+              </div>
+            )}
+            <div>
+              <label htmlFor="quantity">Share Quantity:</label>
+              <input
+                type="number"
+                id="quantity"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                required
+                min="1"
+              />
+            </div>
+            {type === 'Buy' && (
+              <div>
+                <label htmlFor="price">Purchase Price (Rs):</label>
+                <input
+                  type="number"
+                  id="price"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  required
+                  step="0.01"
+                />
+              </div>
+            )}
+            {type === 'Sell' && (
+              <div>
+                <label htmlFor="price">Sell Price (Rs):</label>
+                <input
+                  type="number"
+                  id="price"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  required
+                  step="0.01"
+                />
+              </div>
+            )}
+             {type === 'Sell' && (
+                 <div>
+                    <label htmlFor="holdingType">Holding Type:</label>
+                    <select id="holdingType" value={holdingType} onChange={(e) => setHoldingType(e.target.value)}>
+                        {holdingTypes.map((type) => (
+                            <option key={type.value} value={type.value}>{type.label}</option>
+                        ))}
+                    </select>
+                 </div>
+             )}
+             {/* Display WACC for Sell for user information, derived from holdings */}
+             {type === 'Sell' && (
+                <div>
+                   <label htmlFor="wacc">WACC (from Holdings):</label>
+                   <input type="text" id="wacc" value={fetchedWacc.toFixed(2)} disabled />
+                </div>
+             )}
+          </div>
+
+          {/* Calculated Details Section */}
+          <div style={{ flex: 1, borderLeft: '1px solid #ccc', paddingLeft: '20px' }}>
+              <h3>Details:</h3>
+              {type === 'Buy' && (
+                <>
+                  <p>Total Amount: {initialInvestment.toFixed(2)}</p>
+                  <p>* Commission: {brokerCommission.toFixed(2)}</p>
+                  <p>SEBON FEE: {sebonFee.toFixed(2)}</p>
+                  <p>DP Charge: {dpCharge.toFixed(2)}</p>
+                  <p>Total Commission: {totalCommission.toFixed(2)}</p>
+                  <p>Total Amount Payable (Rs): {amountPayable.toFixed(2)}</p>
+                  {/* WACC for Buy is calculated and saved with the transaction */}
+                </>
+              )}
+               {type === 'Sell' && (
+                <>
+                    <p>Investment: {investment.toFixed(2)}</p>
+                    <p>Initial Selling Amount: {initialSellingAmount.toFixed(2)}</p>
+                    <p>* Commission: {brokerCommission.toFixed(2)}</p>
+                    <p>SEBON Fee: {sebonFee.toFixed(2)}</p>
+                    <p>DP Charge: {dpCharge.toFixed(2)}</p>
+                    <p>Total Commission: {totalCommission.toFixed(2)}</p>
+                    <p>Profit before Tax: {profitBeforeTax.toFixed(2)}</p>
+                    <p>Capital Gain Tax: {capitalGainTax.toFixed(2)}</p>
+                    <p>Net Profit/Loss: {netProfitLoss.toFixed(2)}</p>
+                    <p>Net Profit/Loss%: {netProfitLossPercentage.toFixed(2)}%</p>
+                    <p>Amount Receivable: {amountReceivable.toFixed(2)}</p>
+                </>
+               )}
+              <p style={{ fontSize: '0.8em', color: '#555', marginTop: '10px' }}>
+                * Commission Amount includes NEPSE Commission Rs - & SEBON Regularity Fee Rs - (Additional fees not included in this calculation)
+              </p>
+            </div>
+
+        </div>
+
+        <button type="submit" style={{ marginTop: '20px' }}>Add Transaction</button>
+      </form>
+    </div>
+  );
+}
+
+export default AddTransaction; 

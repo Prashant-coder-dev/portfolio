@@ -1,0 +1,42 @@
+.transactions-container {
+  margin-top: 20px;
+}
+
+.table-responsive {
+  overflow-x: auto; /* Add horizontal scrolling if table is too wide */
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse; /* Remove space between borders */
+  margin-top: 10px;
+}
+
+.transactions-table th,
+.transactions-table td {
+  border: 1px solid #ddd; /* Light grey border */
+  padding: 8px; /* Add some padding */
+  text-align: left; /* Align text to the left */
+}
+
+.transactions-table th {
+  background-color: #f2f2f2; /* Light grey background for headers */
+  font-weight: bold;
+}
+
+.transactions-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* Alternate row colors */
+}
+
+.transactions-table tbody tr:hover {
+  background-color: #e9e9e9; /* Highlight row on hover */
+}
+
+/* Optional: Styling for Buy and Sell rows */
+.transactions-table .buy-row {
+  background-color: #e0ffe0; /* Light green for buy */
+}
+
+.transactions-table .sell-row {
+  background-color: #ffe0e0; /* Light red for sell */
+}

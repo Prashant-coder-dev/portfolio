@@ -1,0 +1,74 @@
+.prices-table {
+    width: 100%; /* Make the table take full width */
+    border-collapse: collapse; /* Collapse borders for a cleaner look */
+    margin-top: 20px; /* Add some space above the table */
+}
+
+.prices-table th,
+.prices-table td {
+    border: 1px solid #ddd; /* Add borders to cells */
+    padding: 8px; /* Add padding inside cells */
+    text-align: left; /* Align text to the left by default */
+}
+
+.prices-table th {
+    background-color: #f2f2f2; /* Add a light grey background to headers */
+    text-align: center; /* Center header text */
+}
+
+.prices-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Add a slightly darker background to even rows */
+}
+
+.prices-table tbody tr:hover {
+    background-color: #ddd; /* Highlight row on hover */
+}
+
+.table-responsive {
+    overflow-x: auto; /* Add horizontal scroll if content overflows */
+}
+
+/* Styles for conditional row coloring */
+.prices-table tbody tr.positive-change {
+    background-color: #d4edda; /* Light green for positive change */
+}
+
+.prices-table tbody tr.negative-change {
+    background-color: #f8d7da; /* Light red for negative change */
+}
+
+.prices-table tbody tr.no-change {
+    background-color: #e2e3e5; /* Light grey for no change */
+}
+
+/* Styles for positioning the text value */
+.today-prices-container {
+    position: relative; /* Needed for absolute positioning of children */
+}
+
+.today-prices-header {
+    display: flex; /* Use flexbox for alignment */
+    justify-content: space-between; /* Distribute space between title and text value */
+    align-items: center; /* Vertically align items */
+    margin-bottom: 10px; /* Add some space below the header */
+}
+
+.text-value-display {
+    font-size: 1.2em; /* Adjust font size as needed */
+    font-weight: bold; /* Make the text bold */
+    /* Position is handled by flexbox in .today-prices-header */
+}
+
+/* Additional styling for text alignment */
+.text-center {
+    text-align: center; /* Center text in cells with this class */
+}
+
+/* Styles for centering specific column data */
+.prices-table td:nth-child(1), /* S.No */
+.prices-table td:nth-child(3), /* LTP */
+.prices-table td:nth-child(4), /* Point Change */
+.prices-table td:nth-child(5), /* % Change */
+.prices-table td:nth-child(6) { /* Prev. Close */
+    text-align: center;
+} 
