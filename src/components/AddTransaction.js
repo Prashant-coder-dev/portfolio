@@ -185,7 +185,7 @@ function AddTransaction({ onAddTransaction, transactions }) {
         }
 
 
-         calculatedAmountReceivable = calculatedInitialSellingAmount - calculatedTotalCommission;
+         calculatedAmountReceivable = calculatedInitialSellingAmount - calculatedTotalCommission - calculatedCapitalGainTax;
 
     }
 
