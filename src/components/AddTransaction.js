@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function AddTransaction({ onAddTransaction, transactions }) {
+function AddTransaction({ onAddTransaction, transactions, holdings }) {
   const [company, setCompany] = useState('');
   const [date, setDate] = useState('');
   const [type, setType] = useState('Buy'); // Default to 'Buy'
@@ -49,24 +49,21 @@ function AddTransaction({ onAddTransaction, transactions }) {
   // Effect to calculate WACC from transactions when company or transactions change for Sell transactions
   useEffect(() => {
       // console.log('AddTransaction useEffect - company, transactions, type changed:', { company, transactions, type }); // Removed log
-      if(type === 'Sell' && company) { // Only calculate if type is Sell and company is selected
-          const buyTransactionsForCompany = transactions.filter(t => t.company === company && t.type === 'Buy');
-
-          let totalQuantity = 0;
-          let totalCost = 0;
-
-          buyTransactionsForCompany.forEach(t => {
-              totalQuantity += t.quantity;
-              totalCost += t.amountPayable;
-          });
-
-          const wacc = totalQuantity > 0 ? totalCost / totalQuantity : 0;
-          // console.log('Calculated WACC for', company, ':', wacc); // Removed log
-          setCalculatedWacc(wacc); // Set the calculated WACC
-      } else if (type === 'Buy') { // Reset WACC if type is Buy
-          setCalculatedWacc(0);
+      // Use the WACC from the holdings prop provided by App.js
+      if (type === 'Sell' && company && holdings && holdings.length > 0) {
+          const currentHolding = holdings.find(h => h.company === company);
+          if (currentHolding) {
+              // console.log('Found holding for', company, 'with WACC:', currentHolding.wacc); // Add this log for debugging
+              setCalculatedWacc(currentHolding.wacc);
+          } else {
+              // console.log('No holding found for', company, 'setting WACC to 0'); // Add this log for debugging
+              setCalculatedWacc(0); // Set to 0 if no holding found
+          }
+      } else {
+          // console.log('Not a Sell transaction or no company selected, resetting WACC to 0'); // Add this log for debugging
+          setCalculatedWacc(0); // Reset WACC if type is Buy or no company is selected
       }
-  }, [company, transactions, type]); // Rerun when company, transactions, or type changes
+  }, [company, type, holdings]); // Rerun when company, type, or holdings change
 
 
   // Effect to calculate details when relevant inputs change
