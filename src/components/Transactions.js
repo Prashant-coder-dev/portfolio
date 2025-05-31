@@ -12,7 +12,6 @@ function Transactions({ transactions, onDeleteTransaction }) {
 
   // Simplified table headers with keys for sorting
   const tableHeaders = [
-    { key: 'id', label: 'ID' },
     { key: 'company', label: 'Company' },
     { key: 'date', label: 'Date' },
     { key: 'type', label: 'Type' },
@@ -29,7 +28,7 @@ function Transactions({ transactions, onDeleteTransaction }) {
   ];
 
   const [sortColumn, setSortColumn] = useState('date'); // Default sort by date
-  const [sortDirection, setSortDirection] = useState('asc'); // Default sort ascending
+  const [sortDirection, setSortDirection] = useState('desc'); // Default sort descending
 
   // Function to handle sorting when a header is clicked
   const handleSort = (columnKey) => {
@@ -65,8 +64,8 @@ function Transactions({ transactions, onDeleteTransaction }) {
         if (sortColumn === 'date') {
             const dateA = new Date(aValue);
             const dateB = new Date(bValue);
-             if (dateA < dateB) return sortDirection === 'asc' ? -1 : 1;
-            if (dateA > dateB) return sortDirection === 'asc' ? 1 : -1;
+             if (dateA < dateB) return sortDirection === 'desc' ? 1 : -1;
+            if (dateA > dateB) return sortDirection === 'desc' ? -1 : 1;
              return 0; // Dates are equal
         }
 
@@ -152,7 +151,6 @@ function Transactions({ transactions, onDeleteTransaction }) {
               {console.log('Rendering transactions in table body:', transactions)}
               {sortedTransactions.map((transaction) => (
                 <tr key={transaction.id} className={transaction.type === 'Buy' ? 'buy-row' : 'sell-row'}>
-                  <td>{transaction.id}</td>
                   <td>{transaction.company}</td>
                   <td>{transaction.date}</td>
                   <td>{transaction.type}</td>
