@@ -82,58 +82,5 @@
 .holdings-table th.sortable-header span.sort-icon {
     margin-left: 5px; /* Space between label and icon */
     font-size: 0.7em; /* Adjust size of the icon */
-    /* Add color or other styles for icons if desired */
     color: #ffffff; /* Example: White color for icons */
-} 
-/* Styles for the Summary Table */
-.summary-table {
-    width: auto; /* Adjust width based on content */
-    border-collapse: collapse; /* Collapse borders */
-    margin-top: 20px;
-    margin-bottom: 20px; /* Add space below the summary table */
-    font-size: 0.9em;
-    /* Optional: Add a subtle shadow */
-    /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
-}
-
-.summary-table th,
-.summary-table td {
-    padding: 8px 12px; /* Add padding to cells */
-    border: 1px solid #dddddd; /* Add borders */
-    text-align: left; /* Align text to the left by default */
-}
-
-/* Optional: Center text in specific columns if needed, e.g., numerical values */
-.summary-table td {
-    text-align: right; /* Example: Align data values to the right */
-}
-
-/* Style for header cells */
-.summary-table th {
-    background-color: #f2f2f2; /* Light grey background for headers */
-    font-weight: bold;
-    text-align: center; /* Center header text */
-}
-
-/* Style for the first column (keys/labels) in the data rows */
-.summary-table td:first-child {
-    font-weight: bold; /* Make the labels bold */
-    text-align: left; /* Ensure labels are left-aligned */
-    background-color: #f9f9f9; /* Slightly different background for labels */
-}
-
-/* Style for rows for better separation (optional) */
-.summary-table tbody tr:nth-of-type(even) {
-    background-color: #ffffff; /* White background for even rows */
-}
-
-.summary-table tbody tr:nth-of-type(odd) {
-    background-color: #f3f3f3; /* Light grey background for odd rows */
-}
-
-/* Remove default margin from paragraphs inside table cells */
-.summary-table td p,
-.summary-table th p {
-    margin: 0;
-    padding: 0;
 }

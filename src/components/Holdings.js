@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import './Holdings.css';
 
-function Holdings({ transactions, todayPrices, holdings, summaryData }) {
+function Holdings({ transactions, todayPrices, holdings }) {
   // Component logic for calculating and displaying holdings goes here
 
   // holdingsData is now calculated in App.js and passed as a prop
@@ -18,7 +18,6 @@ function Holdings({ transactions, todayPrices, holdings, summaryData }) {
      console.log('Holdings component received todayPrices prop:', todayPrices);
      console.log('Holdings component received todayPrices data structure example:', todayPrices.length > 0 ? todayPrices[0] : 'No price data'); // Log structure of price data
      console.log('Holdings component received a sample of todayPrices data:', todayPrices.length > 0 ? todayPrices.slice(0, 5) : 'No price data received'); // Add this log
-     console.log('Holdings component received summaryData prop:', summaryData); // Log summaryData
   }, [holdings, todayPrices]); // Log when holdings or prices change
 
   const tableHeaders = [
@@ -116,64 +115,6 @@ function Holdings({ transactions, todayPrices, holdings, summaryData }) {
   return (
     <div>
       <h2>Current Holdings</h2>
-
-      {/* Display Summary Data */}
-      {summaryData && summaryData.length > 0 && (
-        <div className="holdings-summary">
-          <h3>Summary</h3>
-          {/* Render summary data in a table-like structure matching the screenshot */}
-          {/* Assuming summaryData[0] contains all the key-value pairs */}
-          {summaryData.length > 0 && (
-            <table className="summary-table">
-              <tbody>
-                <tr>
-                  <th>{summaryData[0]['No. of Units:'] ? 'No. of Units:' : 'No. of Units'}</th>
-                  <th>{summaryData[0]['Investment:'] ? 'Investment:' : 'Investment'}</th>
-                  <th>{summaryData[0]['Value:'] ? 'Value:' : 'Value'}</th>
-                </tr>
-                <tr>
-                  <td>{summaryData[0]['393'] || summaryData[0]['No. of Units']}</td> {/* Assuming the key might be the value from the cell above */}
-                  <td>{summaryData[0]['102228.75'] || summaryData[0]['Investment']}</td>
-                  <td>{summaryData[0]['92657.51'] || summaryData[0]['Value']}</td>
-                </tr>
-                <tr>
-                  <th>{summaryData[0]['Stock Holding']}</th>
-                  <th>{summaryData[0]['Net Loss']}</th>
-                  <th>{summaryData[0]['Net Loss%']}</th>
-                </tr>
-                <tr>
-                  <td>{summaryData[0]['5'] || summaryData[0]['Stock Holding']}</td>
-                  <td>{summaryData[0]['-10054.35 ▼'] || summaryData[0]['Net Loss']}</td>
-                  <td>{summaryData[0]['-9.84% ▼'] || summaryData[0]['Net Loss%']}</td>
-                </tr>
-                <tr>
-                  <th>{summaryData[0]['Sector Holding']}</th>
-                  <th colSpan="2">{summaryData[0]['Today\'s Profit']}</th> {/* Spans 2 columns */}
-                </tr>
-                <tr>
-                  <td>{summaryData[0]['4'] || summaryData[0]['Sector Holding']}</td>
-                  <td colSpan="2">{summaryData[0]['0.00 ▲'] || summaryData[0]['Today\'s Profit']}</td> {/* Spans 2 columns */}
-                </tr>
-                <tr>
-                  <th colSpan="2">{summaryData[0]['Receivable Amount :']}</th> {/* Spans 2 columns */}
-                  <th>{summaryData[0]['92174.40'] || summaryData[0]['Receivable Amount :']}</th> {/* Assuming value is under a key that might be the value itself */} {/* This row/cell arrangement for Receivable Amount seems a bit off in the screenshot, adjusting based on likely data */} 
-                </tr>
-                 <tr>
-                  <th>{summaryData[0]['Advanced']}</th>
-                  <th>{summaryData[0]['Declined']}</th>
-                  <th>{summaryData[0]['Unchanged']}</th>
-                </tr>
-                 <tr>
-                  <td>{summaryData[0]['0 ▲'] || summaryData[0]['Advanced']}</td>
-                  <td>{summaryData[0]['0 ▼'] || summaryData[0]['Declined']}</td>
-                  <td>{summaryData[0]['0 ⇆'] || summaryData[0]['Unchanged']}</td>
-                </tr>
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
-
       {/* Check if holdings data is available before rendering the table */}
       {holdings && holdings.length > 0 ? (
         <div className="table-responsive"> {/* Added div for responsive table */}
