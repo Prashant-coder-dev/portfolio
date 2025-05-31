@@ -18,6 +18,9 @@ const INDEX_GID = '2142211097';
 const TOP_TURNOVER_GID = '766316527';
 const TOP_VOLUME_GID = '1392573911';
 
+// Add new GID for Summary data
+const SUMMARY_GID = '1282363353';
+
 // Function to construct the Google Sheet URL for CSV export
 const getGoogleSheetCsvUrl = (sheetId, gid) => {
   return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
@@ -37,6 +40,7 @@ function App() {
   const [indexData, setIndexData] = useState([]);
   const [topTurnoverData, setTopTurnoverData] = useState([]);
   const [topVolumeData, setTopVolumeData] = useState([]);
+  const [summaryData, setSummaryData] = useState([]); // State for summary data
 
   // Function to fetch transactions from the backend
   const fetchTransactions = async () => {
@@ -235,12 +239,16 @@ function App() {
     const topTurnoverUrl = getGoogleSheetCsvUrl(SHEET_ID, TOP_TURNOVER_GID);
     const topVolumeUrl = getGoogleSheetCsvUrl(SHEET_ID, TOP_VOLUME_GID);
 
+    // URL for Summary data
+    const summaryUrl = getGoogleSheetCsvUrl(SHEET_ID, SUMMARY_GID);
+
     // Fetch data for all GIDs
     fetchCsvData(todayPricesUrl, setTodayPrices);
     fetchCsvData(textValueUrl, setTextValue, true); // Fetch text value and mark as such
     fetchCsvData(indexUrl, setIndexData);
     fetchCsvData(topTurnoverUrl, setTopTurnoverData);
     fetchCsvData(topVolumeUrl, setTopVolumeData);
+    fetchCsvData(summaryUrl, setSummaryData); // Fetch summary data
 
   }, []); // Empty dependency array means this runs once on mount
 
@@ -251,7 +259,7 @@ function App() {
       case 'Transaction':
         return <Transactions transactions={transactions} onDeleteTransaction={deleteTransaction} />;
       case 'Holdings':
-        return <Holdings transactions={transactions} todayPrices={todayPrices} holdings={holdingsData} />; // Pass holdings down
+        return <Holdings transactions={transactions} todayPrices={todayPrices} holdings={holdingsData} summaryData={summaryData} />; // Pass holdings and summaryData down
       case 'Realised P&L by Company':
         return <RealisedPnL transactions={transactions} />; // May need prices and holdings here too
       case 'Last Traded Price (LTP)':
@@ -265,7 +273,7 @@ function App() {
           textValue={textValue}
         />; // Pass fetched data to NEPSE component
       default:
-        return <Holdings transactions={transactions} todayPrices={todayPrices} holdings={holdingsData} />; // Default to Holdings tab, pass holdings down
+        return <Holdings transactions={transactions} todayPrices={todayPrices} holdings={holdingsData} summaryData={summaryData} />; // Default to Holdings tab, pass holdings and summaryData down
     }
   };
 
