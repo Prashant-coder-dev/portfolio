@@ -2,6 +2,7 @@ import React from 'react';
 
 function TabNavigation({ activeTab, onTabChange }) {
   const tabs = [
+    'NEPSE',
     'Add Transaction',
     'Transaction',
     'Holdings',

@@ -1,77 +1,133 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import './Transactions.css'; // Import CSS file for styling
 
-function Transactions({ transactions }) {
+function Transactions({ transactions, onDeleteTransaction }) {
+  // Function to handle delete button click
   // Component logic for displaying transactions goes here
 
    useEffect(() => {
     console.log('Transactions component received transactions prop:', transactions);
   }, [transactions]); // Log whenever the transactions prop changes
 
+  // Simplified table headers with keys for sorting
   const tableHeaders = [
-    'Date',
-    'Symbol',
-    'Quantity',
-    'Buy WACC', // Calculated/Fetched WACC
-    'Selling Price', // Only for Sell
-    'Type',
-    'Source', // Transaction Source
-    'Payable', // Amount Payable (Buy)
-    'Receivable', // Amount Receivable (Sell)
-    'Total Commission',
-    'Capital Gain Tax', // Only for Sell
-    'Net Profit/Loss', // Only for Sell
-    'Net Profit/Loss%', // Only for Sell
-    'Existing Quantity', // Added new column
-    'New Quantity', // Added new column
-    'Total Quantity', // Added new column
-    'Existing Investment', // Added new column
-    'New Investment', // Added new column
-    'Total Investment', // Added new column
-    'Existing WACC', // Added new column
-    'New WACC', // Added new column
+    { key: 'id', label: 'ID' },
+    { key: 'company', label: 'Company' },
+    { key: 'date', label: 'Date' },
+    { key: 'type', label: 'Type' },
+    { key: 'quantity', label: 'Quantity' },
+    { key: 'price', label: 'Price' },
+    { key: 'amountPayable', label: 'Amount Payable' },
+    { key: 'totalCommission', label: 'Total Commission' },
+    { key: 'amountReceivable', label: 'Amount Receivable' },
+    { key: 'profitBeforeTax', label: 'Profit Before Tax' },
+    { key: 'capitalGainTax', label: 'Capital Gain Tax' },
+    { key: 'netProfitLoss', label: 'Net Profit/Loss' },
+    { key: 'netProfitLossPercentage', label: 'Net Profit/Loss %' },
+    { key: 'actions', label: 'Actions' }, // Actions column is not sortable
   ];
 
-  // Function to safely access and format data, returning '0.00' or '-' for missing/zero values
-  const formatValue = (value, isCurrency = true) => {
-      if (value === undefined || value === null || value === 0 || value === '' || (typeof value === 'number' && isNaN(value)) ) {
-          return isCurrency ? '0.00' : '-';
-      }
-       if (isCurrency) {
-           return parseFloat(value).toFixed(2);
-       }
-      return value;
+  const [sortColumn, setSortColumn] = useState('date'); // Default sort by date
+  const [sortDirection, setSortDirection] = useState('asc'); // Default sort ascending
+
+  // Function to handle sorting when a header is clicked
+  const handleSort = (columnKey) => {
+    // Prevent sorting on the Actions column
+    if (columnKey === 'actions') {
+        return;
+    }
+
+    if (sortColumn === columnKey) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(columnKey);
+      setSortDirection('asc'); // Default to ascending when changing column
+    }
   };
 
-    // Function to calculate holdings state up to a specific transaction index
-    const calculateHoldingsAtIndex = (transactionsList, companySymbol, untilIndex) => {
-        let totalQuantity = 0;
-        let totalCost = 0; // Represents total investment for Buy transactions
+  // Memoize sorted data for performance
+  const sortedTransactions = useMemo(() => {
+    let sortableTransactions = [...transactions]; // Create a copy to avoid mutating state
 
-        for (let i = 0; i < untilIndex; i++) {
-            const transaction = transactionsList[i];
-            if (transaction.company === companySymbol) {
-                if (transaction.type === 'Buy') {
-                    totalQuantity += transaction.quantity;
-                    totalCost += transaction.amountPayable; // Use amountPayable for Buy cost
-                } else if (transaction.type === 'Sell') {
-                    totalQuantity -= transaction.quantity;
-                     // For simplicity in calculating existing investment based on Buy transactions,
-                     // we only consider the cost added during buys. A more complex FIFO/LIFO
-                     // would be needed for accurate cost basis tracking after sales.
-                }
-            }
+    // Apply sorting
+    if (sortColumn) {
+      sortableTransactions.sort((a, b) => {
+        const aValue = a[sortColumn];
+        const bValue = b[sortColumn];
+
+        // Handle potential null or undefined values
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return sortDirection === 'asc' ? -1 : 1;
+        if (bValue == null) return sortDirection === 'asc' ? 1 : -1;
+
+        // Special handling for date sorting (assuming YYYY-MM-DD format)
+        if (sortColumn === 'date') {
+            const dateA = new Date(aValue);
+            const dateB = new Date(bValue);
+             if (dateA < dateB) return sortDirection === 'asc' ? -1 : 1;
+            if (dateA > dateB) return sortDirection === 'asc' ? 1 : -1;
+             return 0; // Dates are equal
         }
 
-        const wacc = totalQuantity > 0 ? totalCost / totalQuantity : 0;
+        // Case-insensitive comparison for strings, numerical comparison for numbers
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+            const comparison = aValue.toLowerCase().localeCompare(bValue.toLowerCase());
+             return sortDirection === 'asc' ? comparison : -comparison;
+        } else {
+            // Attempt to parse as numbers for numerical comparison
+             const numA = parseFloat(aValue);
+            const numB = parseFloat(bValue);
 
-        return {
-            existingQuantity: totalQuantity,
-            existingInvestment: totalCost,
-            existingWacc: wacc,
-        };
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return sortDirection === 'asc' ? numA - numB : numB - numA;
+            } else if (!isNaN(numA)) {
+                 return sortDirection === 'asc' ? -1 : 1; // numbers come before non-numbers
+            } else if (!isNaN(numB)) {
+                 return sortDirection === 'asc' ? 1 : -1; // non-numbers come after numbers
+            }
+             return 0; // If both are not numbers, maintain original order
+        }
+      });
+    }
+
+    return sortableTransactions;
+  }, [transactions, sortColumn, sortDirection]); // Recalculate when these dependencies change
+
+   // Function to safely access and format data, returning '0.00' or '-' for missing/zero values
+  const formatValue = (value, options = {}) => {
+      const { isCurrency = true, minimumFractionDigits = 2, maximumFractionDigits = 2 } = options;
+
+      if (value === undefined || value === null || value === '' || (typeof value === 'number' && isNaN(value)) ) {
+          return isCurrency ? '0.00' : '-';
+      }
+
+      const numValue = parseFloat(value);
+
+      if (isNaN(numValue)) {
+          return isCurrency ? '0.00' : '-';
+      }
+
+      // Use toLocaleString for number formatting with separators
+      return numValue.toLocaleString(undefined, { // Use undefined to use user's locale
+        minimumFractionDigits: minimumFractionDigits,
+        maximumFractionDigits: maximumFractionDigits,
+      });
+  };
+
+    // Function to handle delete button click
+    const handleDeleteClick = (transactionId) => {
+        if (window.confirm('Are you sure you want to delete this transaction?')) {
+            onDeleteTransaction(transactionId);
+        }
     };
 
+  const formatPercentage = (value) => {
+       if (value === undefined || value === null || value === '' || (typeof parseFloat(value) !== 'number' || isNaN(parseFloat(value))) ) {
+          return 'N/A';
+      }
+      return parseFloat(value).toFixed(2) + '%';
+  };
 
   return (
     <div className="transactions-container">
@@ -81,53 +137,40 @@ function Transactions({ transactions }) {
           <table className="transactions-table">
             <thead>
               <tr>
-                {tableHeaders.map(header => (
-                  <th key={header}>{header}</th>
+                {/* Render table headers dynamically based on tableHeaders array */}
+                {tableHeaders.map((header, index) => (
+                  <th key={index} onClick={() => handleSort(header.key)}>
+                    {header.label}
+                    {sortColumn === header.key && (
+                      <span>{sortDirection === 'asc' ? ' ▲' : ' ▼'}</span>
+                    )}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {transactions.map((transaction, index) => {
-
-                // Calculate existing holdings before this transaction
-                const { existingQuantity, existingInvestment, existingWacc } = calculateHoldingsAtIndex(transactions, transaction.company, index);
-
-                // Calculate new and total values based on the current transaction and existing holdings
-                const newQuantity = transaction.type === 'Buy' ? transaction.quantity : -transaction.quantity;
-                const newInvestment = transaction.type === 'Buy' ? transaction.amountPayable : -(transaction.quantity * existingWacc); // Formula for New Investment on Sell using Existing WACC
-
-                const totalQuantity = existingQuantity + newQuantity;
-                const totalInvestment = existingInvestment + newInvestment;
-
-                const newWacc = totalQuantity > 0 ? totalInvestment / totalQuantity : 0; // Formula for New WACC
-
-                return (
-                  <tr key={index} className={transaction.type === 'Buy' ? 'buy-row' : 'sell-row'}>
-                    <td>{formatValue(transaction.date, false)}</td>
-                    <td>{formatValue(transaction.company, false)}</td>
-                    <td>{formatValue(transaction.quantity, false)}</td>
-                    <td>{formatValue(transaction.wacc)}</td>{/* This is the WACC saved with the transaction */}
-                    <td>{transaction.type === 'Sell' ? formatValue(transaction.price) : '-'}</td>
-                    <td>{formatValue(transaction.type, false)}</td>
-                    <td>{formatValue(transaction.transactionSource || (transaction.type === 'Sell' ? 'Secondary' : ''), false)}</td>
-                    <td>{transaction.type === 'Buy' ? formatValue(transaction.amountPayable) : '-'}</td>
-                    <td>{transaction.type === 'Sell' ? formatValue(transaction.amountReceivable) : '-'}</td>
-                    <td>{formatValue(transaction.totalCommission)}</td>
-                    <td>{transaction.type === 'Sell' ? formatValue(transaction.capitalGainTax) : '-'}</td>
-                    <td>{transaction.type === 'Sell' ? formatValue(transaction.netProfitLoss) : '-'}</td>
-                    <td>{transaction.type === 'Sell' ? `${formatValue(transaction.netProfitLossPercentage)}%` : '-'}</td>
-                    {/* Display new columns */}
-                    <td>{formatValue(existingQuantity, false)}</td>
-                    <td>{formatValue(newQuantity, false)}</td>
-                    <td>{formatValue(totalQuantity, false)}</td>
-                    <td>{formatValue(existingInvestment)}</td>
-                    <td>{formatValue(newInvestment)}</td>
-                    <td>{formatValue(totalInvestment)}</td>
-                    <td>{formatValue(existingWacc)}</td>
-                    <td>{formatValue(newWacc)}</td>
-                  </tr>
-                );
-              })}
+              {console.log('Rendering transactions in table body:', transactions)}
+              {sortedTransactions.map((transaction) => (
+                <tr key={transaction.id} className={transaction.type === 'Buy' ? 'buy-row' : 'sell-row'}>
+                  <td>{transaction.id}</td>
+                  <td>{transaction.company}</td>
+                  <td>{transaction.date}</td>
+                  <td>{transaction.type}</td>
+                  <td>{formatValue(transaction.quantity, { isCurrency: false, minimumFractionDigits: 0, maximumFractionDigits: 4 })}</td>{/* Quantity is not currency, allow more decimal places */}
+                  <td>{formatValue(transaction.price)}</td>
+                  <td>{transaction.type === 'Buy' ? formatValue(transaction.amountPayable) : '-'}</td>
+                  <td>{formatValue(transaction.totalCommission)}</td>
+                  <td>{transaction.type === 'Sell' ? formatValue(transaction.amountReceivable) : '-'}</td>
+                  <td>{transaction.type === 'Sell' ? formatValue(transaction.profitBeforeTax) : '-'}</td>
+                  <td>{transaction.type === 'Sell' ? formatValue(transaction.capitalGainTax) : '-'}</td>
+                  <td>{transaction.type === 'Sell' ? formatValue(transaction.netProfitLoss) : '-'}</td>
+                  <td>{transaction.type === 'Sell' ? `${formatPercentage(transaction.netProfitLossPercentage)}` : '-'}</td>
+                  <td>
+                    <button onClick={() => alert('Edit functionality coming soon!')}>Edit</button>
+                    <button onClick={() => handleDeleteClick(transaction.id)}>Delete</button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -137,5 +180,37 @@ function Transactions({ transactions }) {
     </div>
   );
 }
+
+Transactions.propTypes = {
+    transactions: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        company: PropTypes.string.isRequired,
+        date: PropTypes.string.isRequired,
+        type: PropTypes.string.isRequired,
+        quantity: PropTypes.number.isRequired,
+        price: PropTypes.number,
+        amountPayable: PropTypes.number, // Use camelCase
+        totalCommission: PropTypes.number, // Use camelCase
+        amountReceivable: PropTypes.number, // Use camelCase
+        profitBeforeTax: PropTypes.number, // Use camelCase
+        capitalGainTax: PropTypes.number, // Use camelCase
+        netProfitLoss: PropTypes.number, // Use camelCase
+        netProfitLossPercentage: PropTypes.number, // Use camelCase
+        initialInvestment: PropTypes.number, 
+        transactionSource: PropTypes.string, 
+        initialSellingAmount: PropTypes.number, 
+        holdingType: PropTypes.string, 
+        investment: PropTypes.number, 
+        brokerCommission: PropTypes.number, 
+        sebonFee: PropTypes.number, 
+        dpCharge: PropTypes.number, 
+        wacc: PropTypes.number, 
+
+
+
+        // Add prop types for other fields if you display them
+    })).isRequired,
+    onDeleteTransaction: PropTypes.func.isRequired, // Prop type for delete function
+};
 
 export default Transactions; 

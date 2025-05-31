@@ -1,0 +1,87 @@
+.holdings-table {
+    width: 100%;
+    border-collapse: collapse; /* Collapse borders so they don't double up */
+    margin-top: 20px;
+    font-size: 0.9em;
+    min-width: 400px; /* Ensure a minimum width */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15); /* Add a subtle shadow */
+}
+
+.holdings-table thead tr {
+    background-color: #009879; /* Header background color */
+    color: #ffffff; /* Header text color */
+    text-align: left;
+}
+
+.holdings-table th,
+.holdings-table td {
+    padding: 12px 15px; /* Add padding to cells */
+    border: 1px solid #dddddd; /* Add borders to cells */
+}
+
+.holdings-table tbody tr {
+    border-bottom: 1px solid #dddddd; /* Add border to bottom of rows */
+}
+
+.holdings-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3; /* Add zebra striping to rows */
+}
+
+.holdings-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879; /* Thicker border for the last row */
+}
+
+.holdings-table tbody tr.profit-row {
+    background-color: #e9f7ef; /* Light green for profit rows */
+}
+
+.holdings-table tbody tr.loss-row {
+    background-color: #fdeded; /* Light red for loss rows */
+}
+
+.table-responsive {
+    overflow-x: auto; /* Add horizontal scroll if table is too wide */
+}
+
+/* Styles for filter inputs that are now back in headers */
+.holdings-table th input[type="text"] {
+    margin-top: 5px; /* Add some space between header label and input */
+    padding: 5px; /* Add padding inside the input */
+    border: 1px solid #ccc; /* Add a border */
+    border-radius: 4px; /* Slightly rounded corners */
+    font-size: 0.8em; /* Smaller font size */
+    width: calc(100% - 12px); /* Make input fill the header width, accounting for padding and border */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* Style for sort indicators (text) */
+.holdings-table th span {
+    margin-left: 5px; /* Add space between header label/input and indicator */
+    font-size: 0.8em; /* Smaller size for indicator */
+}
+
+/* Optional: Style headers on hover to indicate sortability */
+.holdings-table th {
+    cursor: pointer; /* Change cursor to pointer to indicate clickable */
+}
+
+/* Optional: Add some padding to the header content to avoid filter overlapping sort indicator */
+.holdings-table th > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.holdings-table th.sortable-header {
+    display: flex; /* Use flexbox to align header content */
+    align-items: center; /* Vertically align items */
+    justify-content: space-between; /* Space out label and icon */
+    cursor: pointer; /* Ensure cursor is pointer */
+}
+
+.holdings-table th.sortable-header span.sort-icon {
+    margin-left: 5px; /* Space between label and icon */
+    font-size: 0.7em; /* Adjust size of the icon */
+    /* Add color or other styles for icons if desired */
+    color: #ffffff; /* Example: White color for icons */
+} 

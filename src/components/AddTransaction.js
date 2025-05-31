@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function AddTransaction({ onAddTransaction, transactions, holdings }) {
+function AddTransaction({ onAddTransaction, transactions }) {
   const [company, setCompany] = useState('');
   const [date, setDate] = useState('');
   const [type, setType] = useState('Buy'); // Default to 'Buy'
@@ -18,7 +18,7 @@ function AddTransaction({ onAddTransaction, transactions, holdings }) {
   const [dpCharge, setDpCharge] = useState(0);
   const [totalCommission, setTotalCommission] = useState(0);
   const [amountPayable, setAmountPayable] = useState(0); // For Buy
-  // const [wacc, setWacc] = useState(0); // WACC will be derived from holdings for Sell
+  // const [wacc, setWacc] = useState(0); // WACC will be derived from transactions for Sell
   const [investment, setInvestment] = useState(0); // For Sell (Quantity * WACC)
   const [profitBeforeTax, setProfitBeforeTax] = useState(0); // For Sell
   const [capitalGainTax, setCapitalGainTax] = useState(0); // For Sell
@@ -26,8 +26,8 @@ function AddTransaction({ onAddTransaction, transactions, holdings }) {
   const [netProfitLossPercentage, setNetProfitLossPercentage] = useState(0); // For Sell
   const [amountReceivable, setAmountReceivable] = useState(0); // For Sell
 
-    // State to hold the fetched WACC for the selected company when type is Sell
-    const [fetchedWacc, setFetchedWacc] = useState(0);
+    // State to hold the calculated WACC for the selected company when type is Sell
+    const [calculatedWacc, setCalculatedWacc] = useState(0); // Changed from fetchedWacc to calculatedWacc
 
 
   // Transaction Sources (Used for Buy and Sell Secondary)
@@ -46,17 +46,27 @@ function AddTransaction({ onAddTransaction, transactions, holdings }) {
   ];
 
 
-  // Effect to find WACC from holdings when company or holdings change for Sell transactions
+  // Effect to calculate WACC from transactions when company or transactions change for Sell transactions
   useEffect(() => {
-      if(type === 'Sell') {
-          const holdingForCompany = holdings.find(h => h.company === company);
-          if(holdingForCompany) {
-              setFetchedWacc(holdingForCompany.wacc);
-          } else {
-              setFetchedWacc(0); // Reset if no holding found for company
-          }
+      // console.log('AddTransaction useEffect - company, transactions, type changed:', { company, transactions, type }); // Removed log
+      if(type === 'Sell' && company) { // Only calculate if type is Sell and company is selected
+          const buyTransactionsForCompany = transactions.filter(t => t.company === company && t.type === 'Buy');
+
+          let totalQuantity = 0;
+          let totalCost = 0;
+
+          buyTransactionsForCompany.forEach(t => {
+              totalQuantity += t.quantity;
+              totalCost += t.amountPayable;
+          });
+
+          const wacc = totalQuantity > 0 ? totalCost / totalQuantity : 0;
+          // console.log('Calculated WACC for', company, ':', wacc); // Removed log
+          setCalculatedWacc(wacc); // Set the calculated WACC
+      } else if (type === 'Buy') { // Reset WACC if type is Buy
+          setCalculatedWacc(0);
       }
-  }, [company, holdings, type]); // Rerun when company, holdings, or type changes
+  }, [company, transactions, type]); // Rerun when company, transactions, or type changes
 
 
   // Effect to calculate details when relevant inputs change
@@ -115,8 +125,8 @@ function AddTransaction({ onAddTransaction, transactions, holdings }) {
     } else if (type === 'Sell') { // Calculations for Sell Transaction
         calculatedInitialSellingAmount = qty * currentPrice;
 
-        // Use the fetchedWacc for Investment calculation
-        calculatedInvestment = qty * fetchedWacc;
+        // Use the calculatedWacc for Investment calculation
+        calculatedInvestment = qty * calculatedWacc; // Use calculatedWacc
 
         // Broker Commission Calculation (Sell - Secondary) - based on Initial Selling Amount
          if (qty > 0) {
@@ -195,7 +205,7 @@ function AddTransaction({ onAddTransaction, transactions, holdings }) {
     setNetProfitLossPercentage(calculatedNetProfitLossPercentage);
     setAmountReceivable(calculatedAmountReceivable);
 
-  }, [quantity, price, type, transactionSource, holdingType, company, fetchedWacc]); // Rerun when these or fetchedWacc changes
+  }, [quantity, price, type, transactionSource, holdingType, company, calculatedWacc]); // Rerun when these or calculatedWacc changes
 
 
   const handleSubmit = (e) => {
@@ -213,47 +223,60 @@ function AddTransaction({ onAddTransaction, transactions, holdings }) {
              alert('Please select Holding Type for Sell transactions.');
              return;
         }
-        if (fetchedWacc === 0) {
-             alert('Cannot sell. No Buy transactions found for this company to calculate WACC.');
+        // Check if there are any buy transactions for the company before allowing a sell
+        const buyTransactionsForCompany = transactions.filter(t => t.company === company && t.type === 'Buy');
+        if (buyTransactionsForCompany.length === 0) {
+             alert('Cannot sell. No Buy transactions found for this company.');
              return;
          }
-         // Add validation to ensure selling quantity does not exceed holding quantity
-          const holdingForCompany = holdings.find(h => h.company === company);
-          if (!holdingForCompany || holdingForCompany.totalQuantity < parseFloat(quantity)) {
-              alert('Selling quantity exceeds available holdings for this company.');
+
+         // Add validation to ensure selling quantity does not exceed current holding quantity
+         // This calculation needs to consider all buy and sell transactions for the company
+         let currentHoldingQuantity = 0;
+         transactions.filter(t => t.company === company).forEach(t => {
+             if (t.type === 'Buy') {
+                 currentHoldingQuantity += t.quantity;
+             } else if (t.type === 'Sell') {
+                 currentHoldingQuantity -= t.quantity;
+             }
+         });
+
+          if (currentHoldingQuantity < parseFloat(quantity)) {
+              alert(`Selling quantity (${quantity}) exceeds available holdings (${currentHoldingQuantity}) for this company.`);
               return;
           }
     }
 
+    const new_transaction = {
+        company: company,
+        date: date,
+        type: type,
+        quantity: parseFloat(quantity) || 0, // Ensure quantity is a number
+        price: parseFloat(price) || 0, // Ensure price is a number
+        amountPayable: type === 'Buy' ? parseFloat(amountPayable) || 0 : null, // Ensure amountPayable is number for Buy, null for Sell
 
-    const newTransaction = {
-      company: company.trim(),
-      date,
-      type,
-      quantity: parseFloat(quantity),
-      price: parseFloat(price), // This is the Buy Price for 'Buy' or Sell Price for 'Sell'
-      timestamp: new Date().toISOString(),
-      // Include calculated values based on type
-      initialInvestment: type === 'Buy' ? initialInvestment : 0,
-      transactionSource: type === 'Buy' ? transactionSource : 'Secondary', // Source is always Secondary for Sell
-      amountPayable: type === 'Buy' ? amountPayable : 0,
-      wacc: fetchedWacc, // Use the fetched WACC for both Buy (will be 0) and Sell
-      initialSellingAmount: type === 'Sell' ? initialSellingAmount : 0,
-      holdingType: type === 'Sell' ? holdingType : '',
-      investment: type === 'Sell' ? investment : 0,
-      brokerCommission: brokerCommission, // Use calculated commission for both Buy/Sell
-      sebonFee: sebonFee, // Use calculated SEBON fee for both Buy/Sell
-      dpCharge: dpCharge, // Use calculated DP charge for both Buy/Sell
-      totalCommission: totalCommission, // Use calculated total commission for both Buy/Sell
-      profitBeforeTax: type === 'Sell' ? profitBeforeTax : 0,
-      capitalGainTax: type === 'Sell' ? capitalGainTax : 0,
-      netProfitLoss: type === 'Sell' ? netProfitLoss : 0,
-      netProfitLossPercentage: type === 'Sell' ? netProfitLossPercentage : 0,
-      amountReceivable: type === 'Sell' ? amountReceivable : 0,
-       // Note: Fees field is removed as per previous request
+        // Include calculated fields from state, ensuring they are numbers or null
+        initialInvestment: type === 'Buy' ? parseFloat(initialInvestment) || 0 : null,
+        transactionSource: transactionSource || null,
+        initialSellingAmount: type === 'Sell' ? parseFloat(initialSellingAmount) || 0 : null,
+        holdingType: holdingType || null,
+        investment: type === 'Sell' ? parseFloat(investment) || 0 : null,
+        brokerCommission: parseFloat(brokerCommission) || 0,
+        sebonFee: parseFloat(sebonFee) || 0,
+        dpCharge: parseFloat(dpCharge) || 0,
+        totalCommission: parseFloat(totalCommission) || 0,
+        profitBeforeTax: type === 'Sell' ? parseFloat(profitBeforeTax) || 0 : null,
+        capitalGainTax: type === 'Sell' ? parseFloat(capitalGainTax) || 0 : null,
+        netProfitLoss: type === 'Sell' ? parseFloat(netProfitLoss) || 0 : null,
+        netProfitLossPercentage: type === 'Sell' ? parseFloat(netProfitLossPercentage) || 0 : null,
+        amountReceivable: type === 'Sell' ? parseFloat(amountReceivable) || 0 : null,
+        wacc: type === 'Buy' ? parseFloat(calculatedWacc) || 0 : null // Include calculatedWacc, ensuring it's number for Buy, null for Sell
     };
 
-    onAddTransaction(newTransaction);
+    // Log the transaction object being sent
+    console.log('Sending transaction to backend:', new_transaction); // Add this log
+
+    onAddTransaction(new_transaction);
 
     // Clear the form and reset states
     setCompany('');
@@ -270,7 +293,7 @@ function AddTransaction({ onAddTransaction, transactions, holdings }) {
     setDpCharge(0);
     setTotalCommission(0);
     setAmountPayable(0);
-    setFetchedWacc(0); // Reset fetchedWacc
+    setCalculatedWacc(0); // Reset calculatedWacc
     setInvestment(0);
     setProfitBeforeTax(0);
     setCapitalGainTax(0);
@@ -385,7 +408,9 @@ function AddTransaction({ onAddTransaction, transactions, holdings }) {
              {type === 'Sell' && (
                 <div>
                    <label htmlFor="wacc">WACC (from Holdings):</label>
-                   <input type="text" id="wacc" value={fetchedWacc.toFixed(2)} disabled />
+                   {/* Temporarily display fetchedWacc directly for debugging */}
+                   {calculatedWacc.toFixed(2)}
+                   <input type="text" id="wacc" value={calculatedWacc.toFixed(2)} disabled />
                 </div>
              )}
           </div>

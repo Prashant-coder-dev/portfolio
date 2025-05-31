@@ -1,0 +1,123 @@
+.nepse-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.nepse-section {
+    margin-bottom: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.nepse-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.2em;
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 10px;
+}
+
+.nepse-text-value {
+    margin-bottom: 20px;
+    font-size: 1.1em;
+    color: #555;
+    text-align: right;
+}
+
+/* Layout for the three columns */
+.nepse-columns-container {
+    display: flex;
+    gap: 20px; /* Space between columns */
+}
+
+.nepse-gainers-losers-column,
+.nepse-turnover-column,
+.nepse-volume-column {
+    flex: 1; /* Each column takes equal space */
+    min-width: 0; /* Allow columns to shrink */
+}
+
+/* Table styles */
+.nepse-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.nepse-table th,
+.nepse-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.nepse-table th {
+    background-color: #0056b3; /* Dark blue background */
+    color: white; /* White text */
+    font-weight: bold;
+    /* cursor: pointer; Remove cursor pointer as sorting is not implemented yet */
+}
+
+.nepse-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Lighter background for even rows */
+}
+
+.nepse-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Sub-tab styles for Gainers/Losers */
+.nepse-sub-tabs {
+    display: flex;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #ddd;
+    position: relative; /* Needed for absolute positioning of actions */
+}
+
+.nepse-sub-tab-button {
+    padding: 10px 15px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 1em;
+    color: #555;
+    transition: color 0.3s ease;
+}
+
+.nepse-sub-tab-button:hover {
+    color: #000;
+}
+
+.nepse-sub-tab-button.active {
+    color: #0056b3;
+    border-bottom: 2px solid #0056b3;
+    font-weight: bold;
+}
+
+/* Style for refresh icon and View all link */
+.nepse-sub-tab-actions {
+    position: absolute;
+    right: 0;
+    bottom: 10px; /* Align with bottom of tabs */
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 0.9em;
+}
+
+.refresh-icon {
+    cursor: pointer;
+    color: #0056b3;
+}
+
+.view-all-link {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+.view-all-link:hover {
+    text-decoration: underline;
+} 

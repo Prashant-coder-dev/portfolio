@@ -1,18 +1,38 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import './TodayPrices.css'; // Import CSS file
 
 function TodayPrices({ prices, textValue }) {
   // Component logic for displaying today's prices goes here
   // This will involve formatting and displaying the fetched prices
 
+  const [searchTerm, setSearchTerm] = useState(''); // State for search input
+
    useEffect(() => {
     console.log('TodayPrices component received prices prop:', prices);
      console.log('TodayPrices component received textValue prop:', textValue);
   }, [prices, textValue]); // Log whenever the prices or textValue prop changes
 
+  // Function to handle search input changes
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+   // Memoize filtered prices data for performance
+  const filteredPrices = useMemo(() => {
+    if (!searchTerm) {
+      return prices; // Return all prices if search term is empty
+    }
+    // Filter prices based on company symbol (case-insensitive)
+    return prices.filter(priceItem => 
+        priceItem.Symbol && priceItem.Symbol.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [prices, searchTerm]); // Recalculate when prices or search term change
+
    // Function to safely access and format data with separators and decimals
-  const formatValue = (value, isCurrency = true) => {
-      if (value === undefined || value === null || value === 0 || value === '' || (typeof value === 'number' && isNaN(value)) ) {
+  const formatValue = (value, options = {}) => {
+      const { isCurrency = true, minimumFractionDigits = 2, maximumFractionDigits = 2 } = options;
+
+      if (value === undefined || value === null || value === '' || (typeof value === 'number' && isNaN(value)) ) {
           return isCurrency ? '0.00' : '-';
       }
        if (isCurrency || typeof value === 'number') { // Apply formatting to numbers and currency
@@ -38,9 +58,22 @@ function TodayPrices({ prices, textValue }) {
     <div className="today-prices-container"> {/* Added a container div for layout */}
       <div className="today-prices-header"> {/* Container for the header and text value */}
         <h2>Last Traded Price (LTP)</h2>{/* Updated title */}
+         <div className="search-container"> {/* Add a container for search input */}
+            <input
+                type="text"
+                placeholder="Enter Company Symbol"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="search-input"
+            />
+            {/* You can add a search icon here if desired, similar to your screenshot */}
+            {/* <span className="search-icon">🔍</span> */}
+             <span className="search-icon">🔍</span> {/* Add the search icon element */}
+         </div>
         {textValue && <div className="text-value-display">{textValue}</div>} {/* Display the text value */}
       </div>
-      {prices && prices.length > 0 ? (
+      {/* Use filteredPrices for conditional rendering and mapping */}
+      {filteredPrices && filteredPrices.length > 0 ? (
         <div className="table-responsive"> {/* Add div for responsive table */}
           <table className="prices-table"> {/* Add class for styling */}
             <thead>
@@ -52,7 +85,8 @@ function TodayPrices({ prices, textValue }) {
               </tr>
             </thead>
             <tbody>
-              {prices.map((priceItem, index) => {
+              {/* Map over filteredPrices instead of prices */}
+              {filteredPrices.map((priceItem, index) => {
 
                 // Determine row class based on 'Point Change' value
                 const pointChangeValue = parseFloat(priceItem['Point Change']);

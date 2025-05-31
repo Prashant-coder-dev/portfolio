@@ -1,0 +1,37 @@
+.realised-pnl-table {
+    width: 100%;
+    border-collapse: collapse; /* Collapse borders so they don't double up */
+    margin-top: 20px;
+    font-size: 0.9em;
+    min-width: 400px; /* Ensure a minimum width */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15); /* Add a subtle shadow */
+}
+
+.realised-pnl-table thead tr {
+    background-color: #009879; /* Header background color */
+    color: #ffffff; /* Header text color */
+    text-align: left;
+}
+
+.realised-pnl-table th,
+.realised-pnl-table td {
+    padding: 12px 15px; /* Add padding to cells */
+    border: 1px solid #dddddd; /* Add borders to cells */
+}
+
+.realised-pnl-table tbody tr {
+    border-bottom: 1px solid #dddddd; /* Add border to bottom of rows */
+}
+
+.realised-pnl-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3; /* Add zebra striping to rows */
+}
+
+.realised-pnl-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879; /* Thicker border for the last row */
+}
+
+/* Add responsive table container styles */
+.table-responsive {
+    overflow-x: auto; /* Add horizontal scroll if table is too wide */
+} 
