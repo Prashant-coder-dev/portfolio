@@ -18,9 +18,6 @@ const INDEX_GID = '2142211097';
 const TOP_TURNOVER_GID = '766316527';
 const TOP_VOLUME_GID = '1392573911';
 
-// Add new GID for Summary data
-const SUMMARY_GID = '1282363353';
-
 // Function to construct the Google Sheet URL for CSV export
 const getGoogleSheetCsvUrl = (sheetId, gid) => {
   return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
@@ -40,7 +37,6 @@ function App() {
   const [indexData, setIndexData] = useState([]);
   const [topTurnoverData, setTopTurnoverData] = useState([]);
   const [topVolumeData, setTopVolumeData] = useState([]);
-  const [summaryData, setSummaryData] = useState([]); // State for summary data
 
   // Function to fetch transactions from the backend
   const fetchTransactions = async () => {
@@ -199,56 +195,21 @@ function App() {
                setData(''); // Set to empty string if G2 is not found
            }
       } else {
-        // Check if this is the summary data GID
-        if (url.includes(SUMMARY_GID)) {
-            const rows = text.split('\n').map(row => row.split(','));
-            const summaryObject = {};
-
-            // Extract data based on screenshot (assuming consistent cell positions)
-            // Example: 'No. of Units' is in A1, value in A2
-            if (rows.length > 1) summaryObject[rows[0][0].trim()] = rows[1][0] ? rows[1][0].trim() : '';
-            // Example: 'Investment' is in B1, value in B2
-            if (rows.length > 1 && rows[0].length > 1) summaryObject[rows[0][1].trim()] = rows[1][1] ? rows[1][1].trim() : '';
-            // Example: 'Value' is in C1, value in C2
-            if (rows.length > 1 && rows[0].length > 2) summaryObject[rows[0][2].trim()] = rows[1][2] ? rows[1][2].trim() : '';
-            // Example: 'Stock Holding' is in A4, value in A5
-            if (rows.length > 4) summaryObject[rows[3][0].trim()] = rows[4][0] ? rows[4][0].trim() : '';
-            // Example: 'Net Loss' is in B4, value in B5
-            if (rows.length > 4 && rows[3].length > 1) summaryObject[rows[3][1].trim()] = rows[4][1] ? rows[4][1].trim() : '';
-            // Example: 'Net Loss%' is in C4, value in C5
-            if (rows.length > 4 && rows[3].length > 2) summaryObject[rows[3][2].trim()] = rows[4][2] ? rows[4][2].trim() : '';
-            // Example: 'Sector Holding' is in A7, value in A8
-            if (rows.length > 7) summaryObject[rows[6][0].trim()] = rows[7][0] ? rows[7][0].trim() : '';
-            // Example: 'Today's Profit' is in B7, value in B8
-            if (rows.length > 7 && rows[6].length > 1) summaryObject[rows[6][1].trim()] = rows[7][1] ? rows[7][1].trim() : '';
-            // Example: 'Receivable Amount' is in B9, value in C9
-            if (rows.length > 8 && rows[8].length > 1) summaryObject[rows[8][1].trim()] = rows[8][2] ? rows[8][2].trim() : ''; // Note: Key in B9, Value in C9
-            // Example: 'Advanced' is in A10, value in A11
-            if (rows.length > 10) summaryObject[rows[9][0].trim()] = rows[10][0] ? rows[10][0].trim() : '';
-            // Example: 'Declined' is in B10, value in B11
-            if (rows.length > 10 && rows[9].length > 1) summaryObject[rows[9][1].trim()] = rows[10][1] ? rows[10][1].trim() : '';
-            // Example: 'Unchanged' is in C10, value in C11
-            if (rows.length > 10 && rows[9].length > 2) summaryObject[rows[9][2].trim()] = rows[10][2] ? rows[10][2].trim() : '';
-
-            console.log('Parsed Summary Data:', summaryObject);
-            setData([summaryObject]); // Set the state with an array containing the single summary object
+        // Original parsing logic for tables (TodayPrices, NEPSE data)
+        const rows = text.split('\n').map(row => row.split(','));
+        if (rows.length > 1) {
+            const headers = rows[0];
+            const data = rows.slice(1).map(row => {
+                let obj = {};
+                headers.forEach((header, index) => {
+                    obj[header.trim()] = row[index] ? row[index].trim() : '';
+                });
+                return obj;
+            }).filter(obj => Object.values(obj).some(value => value !== ''));
+            console.log('Parsed CSV data for tables:', data);
+            setData(data);
         } else {
-            // Original parsing logic for tables (TodayPrices, NEPSE data)
-            const rows = text.split('\n').map(row => row.split(','));
-            if (rows.length > 1) {
-                const headers = rows[0];
-                const data = rows.slice(1).map(row => {
-                    let obj = {};
-                    headers.forEach((header, index) => {
-                        obj[header.trim()] = row[index] ? row[index].trim() : '';
-                    });
-                    return obj;
-                }).filter(obj => Object.values(obj).some(value => value !== ''));
-                console.log('Parsed CSV data for tables:', data);
-                setData(data);
-            } else {
-                setData([]);
-            }
+            setData([]);
         }
       }
     } catch (error) {
@@ -272,16 +233,12 @@ function App() {
     const topTurnoverUrl = getGoogleSheetCsvUrl(SHEET_ID, TOP_TURNOVER_GID);
     const topVolumeUrl = getGoogleSheetCsvUrl(SHEET_ID, TOP_VOLUME_GID);
 
-    // URL for Summary data
-    const summaryUrl = getGoogleSheetCsvUrl(SHEET_ID, SUMMARY_GID);
-
     // Fetch data for all GIDs
     fetchCsvData(todayPricesUrl, setTodayPrices);
     fetchCsvData(textValueUrl, setTextValue, true); // Fetch text value and mark as such
     fetchCsvData(indexUrl, setIndexData);
     fetchCsvData(topTurnoverUrl, setTopTurnoverData);
     fetchCsvData(topVolumeUrl, setTopVolumeData);
-    fetchCsvData(summaryUrl, setSummaryData); // Fetch summary data
 
   }, []); // Empty dependency array means this runs once on mount
 
@@ -292,7 +249,7 @@ function App() {
       case 'Transaction':
         return <Transactions transactions={transactions} onDeleteTransaction={deleteTransaction} />;
       case 'Holdings':
-        return <Holdings transactions={transactions} todayPrices={todayPrices} holdings={holdingsData} summaryData={summaryData} />; // Pass holdings and summaryData down
+        return <Holdings transactions={transactions} todayPrices={todayPrices} holdings={holdingsData} />; // Pass holdings down
       case 'Realised P&L by Company':
         return <RealisedPnL transactions={transactions} />; // May need prices and holdings here too
       case 'Last Traded Price (LTP)':
@@ -306,7 +263,7 @@ function App() {
           textValue={textValue}
         />; // Pass fetched data to NEPSE component
       default:
-        return <Holdings transactions={transactions} todayPrices={todayPrices} holdings={holdingsData} summaryData={summaryData} />; // Default to Holdings tab, pass holdings and summaryData down
+        return <Holdings transactions={transactions} todayPrices={todayPrices} holdings={holdingsData} />; // Default to Holdings tab, pass holdings down
     }
   };
 
