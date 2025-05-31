@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import './Holdings.css';
 
-function Holdings({ transactions, todayPrices, holdings }) {
+function Holdings({ transactions, todayPrices, holdings, summaryData }) {
   // Component logic for calculating and displaying holdings goes here
 
   // holdingsData is now calculated in App.js and passed as a prop
@@ -18,6 +18,7 @@ function Holdings({ transactions, todayPrices, holdings }) {
      console.log('Holdings component received todayPrices prop:', todayPrices);
      console.log('Holdings component received todayPrices data structure example:', todayPrices.length > 0 ? todayPrices[0] : 'No price data'); // Log structure of price data
      console.log('Holdings component received a sample of todayPrices data:', todayPrices.length > 0 ? todayPrices.slice(0, 5) : 'No price data received'); // Add this log
+     console.log('Holdings component received summaryData prop:', summaryData); // Log summaryData
   }, [holdings, todayPrices]); // Log when holdings or prices change
 
   const tableHeaders = [
@@ -115,6 +116,25 @@ function Holdings({ transactions, todayPrices, holdings }) {
   return (
     <div>
       <h2>Current Holdings</h2>
+
+      {/* Display Summary Data */}
+      {summaryData && summaryData.length > 0 && (
+        <div className="holdings-summary">
+          <h3>Summary</h3>
+          {/* Assuming summaryData[0] contains the key-value pairs for the summary */}
+          {/* Create a flex container for better alignment */} 
+          <div className="summary-grid">
+            {summaryData.length > 0 && Object.entries(summaryData[0]).map(([key, value]) => (
+              // Render each key-value pair as a separate item in the grid
+              <div key={key} className="summary-grid-item">
+                <p><strong>{key}:</strong></p>
+                <p>{value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Check if holdings data is available before rendering the table */}
       {holdings && holdings.length > 0 ? (
         <div className="table-responsive"> {/* Added div for responsive table */}
