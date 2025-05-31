@@ -199,23 +199,56 @@ function App() {
                setData(''); // Set to empty string if G2 is not found
            }
       } else {
-        // Basic CSV parsing logic for tables (will need refinement based on actual sheet format)
-        const rows = text.split('\n').map(row => row.split(','));
-        // Assuming the first row is headers, slice it off and create objects
-        if (rows.length > 1) {
-            const headers = rows[0];
-            const data = rows.slice(1).map(row => {
-                let obj = {};
-                headers.forEach((header, index) => {
-                    obj[header.trim()] = row[index] ? row[index].trim() : '';
-                });
-                return obj;
-            }).filter(obj => Object.values(obj).some(value => value !== '')); // Filter out potentially empty rows
-             console.log('Parsed CSV data for tables:', data); // Log parsed data for tables
-            setData(data);
-             console.log('todayPrices state set in App.js:', data); // Add this log
+        // Check if this is the summary data GID
+        if (url.includes(SUMMARY_GID)) {
+            const rows = text.split('\n').map(row => row.split(','));
+            const summaryObject = {};
+
+            // Extract data based on screenshot (assuming consistent cell positions)
+            // Example: 'No. of Units' is in A1, value in A2
+            if (rows.length > 1) summaryObject[rows[0][0].trim()] = rows[1][0] ? rows[1][0].trim() : '';
+            // Example: 'Investment' is in B1, value in B2
+            if (rows.length > 1 && rows[0].length > 1) summaryObject[rows[0][1].trim()] = rows[1][1] ? rows[1][1].trim() : '';
+            // Example: 'Value' is in C1, value in C2
+            if (rows.length > 1 && rows[0].length > 2) summaryObject[rows[0][2].trim()] = rows[1][2] ? rows[1][2].trim() : '';
+            // Example: 'Stock Holding' is in A4, value in A5
+            if (rows.length > 4) summaryObject[rows[3][0].trim()] = rows[4][0] ? rows[4][0].trim() : '';
+            // Example: 'Net Loss' is in B4, value in B5
+            if (rows.length > 4 && rows[3].length > 1) summaryObject[rows[3][1].trim()] = rows[4][1] ? rows[4][1].trim() : '';
+            // Example: 'Net Loss%' is in C4, value in C5
+            if (rows.length > 4 && rows[3].length > 2) summaryObject[rows[3][2].trim()] = rows[4][2] ? rows[4][2].trim() : '';
+            // Example: 'Sector Holding' is in A7, value in A8
+            if (rows.length > 7) summaryObject[rows[6][0].trim()] = rows[7][0] ? rows[7][0].trim() : '';
+            // Example: 'Today's Profit' is in B7, value in B8
+            if (rows.length > 7 && rows[6].length > 1) summaryObject[rows[6][1].trim()] = rows[7][1] ? rows[7][1].trim() : '';
+            // Example: 'Receivable Amount' is in B9, value in C9
+            if (rows.length > 8 && rows[8].length > 1) summaryObject[rows[8][1].trim()] = rows[8][2] ? rows[8][2].trim() : ''; // Note: Key in B9, Value in C9
+            // Example: 'Advanced' is in A10, value in A11
+            if (rows.length > 10) summaryObject[rows[9][0].trim()] = rows[10][0] ? rows[10][0].trim() : '';
+            // Example: 'Declined' is in B10, value in B11
+            if (rows.length > 10 && rows[9].length > 1) summaryObject[rows[9][1].trim()] = rows[10][1] ? rows[10][1].trim() : '';
+            // Example: 'Unchanged' is in C10, value in C11
+            if (rows.length > 10 && rows[9].length > 2) summaryObject[rows[9][2].trim()] = rows[10][2] ? rows[10][2].trim() : '';
+
+            console.log('Parsed Summary Data:', summaryObject);
+            setData([summaryObject]); // Set the state with an array containing the single summary object
         } else {
-            setData([]); // Handle empty sheet
+            // Original parsing logic for tables (TodayPrices, NEPSE data)
+            const rows = text.split('\n').map(row => row.split(','));
+            if (rows.length > 1) {
+                const headers = rows[0];
+                const data = rows.slice(1).map(row => {
+                    let obj = {};
+                    headers.forEach((header, index) => {
+                        obj[header.trim()] = row[index] ? row[index].trim() : '';
+                    });
+                    return obj;
+                }).filter(obj => Object.values(obj).some(value => value !== ''));
+                console.log('Parsed CSV data for tables:', data);
+                setData(data);
+            } else {
+                setData([]);
+            }
         }
       }
     } catch (error) {
@@ -228,7 +261,7 @@ function App() {
     }
   };
 
-  // Fetch prices and text value from Google Sheets on component mount (still using sheets for this data)
+  // Function to fetch prices and text value from Google Sheets on component mount (still using sheets for this data)
   useEffect(() => {
     console.log('Fetching prices and other data from Google Sheets...'); // Updated log message
     const todayPricesUrl = getGoogleSheetCsvUrl(SHEET_ID, TODAY_PRICES_GID);
