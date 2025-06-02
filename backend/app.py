@@ -48,108 +48,137 @@ with app.app_context():
     # if you get database schema errors.
     db.create_all()
 
+# Root route handler
+@app.route('/')
+def home():
+    return jsonify({
+        'status': 'API is running',
+        'endpoints': {
+            'GET /api/transactions': 'Get all transactions',
+            'POST /api/transactions': 'Add a new transaction',
+            'PUT /api/transactions/<id>': 'Update a transaction',
+            'DELETE /api/transactions/<id>': 'Delete a transaction'
+        }
+    })
+
+# Error handlers
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        'error': 'Not found',
+        'message': 'The requested URL was not found on the server'
+    }), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({
+        'error': 'Internal server error',
+        'message': 'An unexpected error occurred'
+    }), 500
+
 # Endpoint to add a new transaction
 @app.route('/api/transactions', methods=['POST'])
 def add_transaction():
-    data = request.json
-    new_transaction = Transaction(
-        company=data['company'],
-        type=data['type'],
-        quantity=data['quantity'],
-        price=data['price'],
-        amount_payable=data.get('amountPayable'), # Use .get for optional fields
-        date=data['date'],
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
 
-        # Include calculated fields from frontend
-        initial_investment = data.get('initialInvestment'),
-        transaction_source = data.get('transactionSource'),
-        initial_selling_amount = data.get('initialSellingAmount'),
-        holding_type = data.get('holdingType'),
-        investment = data.get('investment'),
-        broker_commission = data.get('brokerCommission'),
-        sebon_fee = data.get('sebonFee'),
-        dp_charge = data.get('dpCharge'),
-        total_commission = data.get('totalCommission'),
-        profit_before_tax = data.get('profitBeforeTax'),
-        capital_gain_tax = data.get('capitalGainTax'),
-        net_profit_loss = data.get('netProfitLoss'),
-        net_profit_loss_percentage = data.get('netProfitLossPercentage'),
-        amount_receivable = data.get('amountReceivable'),
-        wacc = data.get('wacc') # Include WACC
-    )
-    db.session.add(new_transaction)
-    db.session.commit()
-    print(f"Received data: {data}")
-    return jsonify({'message': 'Transaction added successfully!'}), 201
+        new_transaction = Transaction(
+            company=data['company'],
+            type=data['type'],
+            quantity=data['quantity'],
+            price=data['price'],
+            amount_payable=data.get('amountPayable'),
+            date=data['date'],
+            initial_investment=data.get('initialInvestment'),
+            transaction_source=data.get('transactionSource'),
+            initial_selling_amount=data.get('initialSellingAmount'),
+            holding_type=data.get('holdingType'),
+            investment=data.get('investment'),
+            broker_commission=data.get('brokerCommission'),
+            sebon_fee=data.get('sebonFee'),
+            dp_charge=data.get('dpCharge'),
+            total_commission=data.get('totalCommission'),
+            profit_before_tax=data.get('profitBeforeTax'),
+            capital_gain_tax=data.get('capitalGainTax'),
+            net_profit_loss=data.get('netProfitLoss'),
+            net_profit_loss_percentage=data.get('netProfitLossPercentage'),
+            amount_receivable=data.get('amountReceivable'),
+            wacc=data.get('wacc')
+        )
+        db.session.add(new_transaction)
+        db.session.commit()
+        return jsonify({'message': 'Transaction added successfully!', 'id': new_transaction.id}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 # Endpoint to get all transactions
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
-    transactions = Transaction.query.all()
-    output = []
-    for transaction in transactions:
-        output.append({
-            'id': transaction.id,
-            'company': transaction.company,
-            'type': transaction.type,
-            'quantity': transaction.quantity,
-            'price': transaction.price,
-            'amountPayable': transaction.amount_payable,
-            'date': transaction.date,
-            'initialInvestment': transaction.initial_investment,
-            'transactionSource': transaction.transaction_source,
-            'initialSellingAmount': transaction.initial_selling_amount,
-            'holdingType': transaction.holding_type,
-            'investment': transaction.investment,
-            'brokerCommission': transaction.broker_commission,
-            'sebonFee': transaction.sebon_fee,
-            'dpCharge': transaction.dp_charge,
-            'totalCommission': transaction.total_commission,
-            'profitBeforeTax': transaction.profit_before_tax,
-            'capitalGainTax': transaction.capital_gain_tax,
-            'netProfitLoss': transaction.net_profit_loss,
-            'netProfitLossPercentage': transaction.net_profit_loss_percentage,
-            'amountReceivable': transaction.amount_receivable,
-            'wacc': transaction.wacc # Include WACC
-        })
-    return jsonify(output)
+    try:
+        transactions = Transaction.query.all()
+        output = []
+        for transaction in transactions:
+            output.append({
+                'id': transaction.id,
+                'company': transaction.company,
+                'type': transaction.type,
+                'quantity': transaction.quantity,
+                'price': transaction.price,
+                'amountPayable': transaction.amount_payable,
+                'date': transaction.date,
+                'initialInvestment': transaction.initial_investment,
+                'transactionSource': transaction.transaction_source,
+                'initialSellingAmount': transaction.initial_selling_amount,
+                'holdingType': transaction.holding_type,
+                'investment': transaction.investment,
+                'brokerCommission': transaction.broker_commission,
+                'sebonFee': transaction.sebon_fee,
+                'dpCharge': transaction.dp_charge,
+                'totalCommission': transaction.total_commission,
+                'profitBeforeTax': transaction.profit_before_tax,
+                'capitalGainTax': transaction.capital_gain_tax,
+                'netProfitLoss': transaction.net_profit_loss,
+                'netProfitLossPercentage': transaction.net_profit_loss_percentage,
+                'amountReceivable': transaction.amount_receivable,
+                'wacc': transaction.wacc
+            })
+        return jsonify(output)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Endpoint to update a transaction
 @app.route('/api/transactions/<int:id>', methods=['PUT'])
 def update_transaction(id):
-    transaction = Transaction.query.get_or_404(id)
-    data = request.json
-    transaction.company = data.get('company', transaction.company)
-    transaction.type = data.get('type', transaction.type)
-    transaction.quantity = data.get('quantity', transaction.quantity)
-    transaction.price = data.get('price', transaction.price)
-    transaction.amount_payable = data.get('amountPayable', transaction.amount_payable)
-    transaction.date = data.get('date', transaction.date)
-    transaction.initial_investment = data.get('initialInvestment', transaction.initial_investment)
-    transaction.transaction_source = data.get('transactionSource', transaction.transaction_source)
-    transaction.initial_selling_amount = data.get('initialSellingAmount', transaction.initial_selling_amount)
-    transaction.holding_type = data.get('holdingType', transaction.holding_type)
-    transaction.investment = data.get('investment', transaction.investment)
-    transaction.broker_commission = data.get('brokerCommission', transaction.broker_commission)
-    transaction.sebon_fee = data.get('sebonFee', transaction.sebon_fee)
-    transaction.dp_charge = data.get('dpCharge', transaction.dp_charge)
-    transaction.total_commission = data.get('totalCommission', transaction.total_commission)
-    transaction.profit_before_tax = data.get('profitBeforeTax', transaction.profit_before_tax)
-    transaction.capital_gain_tax = data.get('capitalGainTax', transaction.capital_gain_tax)
-    transaction.net_profit_loss = data.get('netProfitLoss', transaction.net_profit_loss)
-    transaction.net_profit_loss_percentage = data.get('netProfitLossPercentage', transaction.net_profit_loss_percentage)
-    transaction.amount_receivable = data.get('amountReceivable', transaction.amount_receivable)
-    transaction.wacc = data.get('wacc', transaction.wacc)
-    db.session.commit()
-    return jsonify({'message': f'Transaction {id} updated successfully!'})
+    try:
+        transaction = Transaction.query.get_or_404(id)
+        data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        for key, value in data.items():
+            if hasattr(transaction, key):
+                setattr(transaction, key, value)
+
+        db.session.commit()
+        return jsonify({'message': f'Transaction {id} updated successfully!'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 # Endpoint to delete a transaction
 @app.route('/api/transactions/<int:id>', methods=['DELETE'])
 def delete_transaction(id):
-    transaction = Transaction.query.get_or_404(id)
-    db.session.delete(transaction)
-    db.session.commit()
-    return jsonify({'message': f'Transaction {id} deleted successfully!'})
+    try:
+        transaction = Transaction.query.get_or_404(id)
+        db.session.delete(transaction)
+        db.session.commit()
+        return jsonify({'message': f'Transaction {id} deleted successfully!'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True, host='0.0.0.0', port=5000) 
