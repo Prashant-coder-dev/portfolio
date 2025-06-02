@@ -27,7 +27,7 @@ const getGoogleSheetCsvUrl = (sheetId, gid) => {
 const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000/api/transactions';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('Holdings');
+  const [activeTab, setActiveTab] = useState('NEPSE');
   const [transactions, setTransactions] = useState([]);
   const [todayPrices, setTodayPrices] = useState([]);
   const [holdingsData, setHoldingsData] = useState([]); // State for holdings data
