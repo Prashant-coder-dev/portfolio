@@ -12,6 +12,7 @@ import './App.css'; // Import the CSS file
 const SHEET_ID = '1Q_En7VGGfifDmn5xuiF-t_02doPpwl4PLzxb4TBCW0Q';
 const TODAY_PRICES_GID = '973375528';
 const TEXT_VALUE_GID = '1931558468'; // Added new GID for text value
+const TRANSACTIONS_GID = '1996493815'; // Add GID for transactions sheet
 
 // Add new GIDs for NEPSE data
 const INDEX_GID = '2142211097';
@@ -23,8 +24,8 @@ const getGoogleSheetCsvUrl = (sheetId, gid) => {
   return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
 };
 
-// Backend API URL (assuming it runs locally on port 5000)
-const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000/api/transactions';
+// Backend API URL
+const API_URL = 'http://127.0.0.1:5000/api/transactions';
 
 function App() {
   const [activeTab, setActiveTab] = useState('NEPSE');
@@ -33,7 +34,7 @@ function App() {
   const [holdingsData, setHoldingsData] = useState([]); // State for holdings data
   const [textValue, setTextValue] = useState(''); // State for the text value from G2
 
-  // Add state for new NEPSE data (removing gainer and loser state)
+  // Add state for new NEPSE data
   const [indexData, setIndexData] = useState([]);
   const [topTurnoverData, setTopTurnoverData] = useState([]);
   const [topVolumeData, setTopVolumeData] = useState([]);
@@ -47,23 +48,124 @@ function App() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      // Add a check to ensure fetched data is an array
-      if (Array.isArray(data)) {
-          console.log('Successfully loaded transactions from backend:', data);
-          setTransactions(data);
-      } else {
-          console.error('Loaded data from backend is not an array.', data);
-          setTransactions([]); // Initialize with empty array
-      }
+      console.log('Successfully loaded transactions from backend:', data);
+      setTransactions(data);
     } catch (error) {
       console.error('Error fetching transactions from backend:', error);
-      setTransactions([]); // Initialize with empty array on error
+      setTransactions([]);
     }
   };
 
   // Fetch transactions from backend on initial load
   useEffect(() => {
     fetchTransactions();
+  }, []);
+
+  // Function to add a transaction
+  const addTransaction = async (transaction) => {
+    console.log('Adding new transaction to backend:', transaction);
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transaction),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Transaction added successfully:', result);
+      fetchTransactions(); // Refresh transactions after adding
+    } catch (error) {
+      console.error('Error adding transaction to backend:', error);
+    }
+  };
+
+  // Function to delete a transaction
+  const deleteTransaction = async (transactionId) => {
+    console.log(`Deleting transaction with ID: ${transactionId}`);
+    try {
+      const response = await fetch(`${API_URL}/${transactionId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Transaction deleted successfully:', result);
+      fetchTransactions(); // Refresh transactions after deleting
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+    }
+  };
+
+  // Function to fetch and parse CSV data from Google Sheets
+  const fetchCsvData = async (url, setData, isTextValue = false) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const text = await response.text();
+
+      console.log('Raw CSV data from Google Sheet:', text);
+
+      if (isTextValue) {
+        const rows = text.split('\n').map(row => row.split(','));
+        if (rows.length > 1 && rows[1].length > 6) {
+          setData(rows[1][6].trim());
+        } else {
+          console.warn('G2 cell not found or sheet structure unexpected for text value GID.');
+          setData('');
+        }
+      } else {
+        const rows = text.split('\n').map(row => row.split(','));
+        if (rows.length > 1) {
+          const headers = rows[0];
+          const data = rows.slice(1).map(row => {
+            let obj = {};
+            headers.forEach((header, index) => {
+              obj[header.trim()] = row[index] ? row[index].trim() : '';
+            });
+            return obj;
+          }).filter(obj => Object.values(obj).some(value => value !== ''));
+          console.log('Parsed CSV data for tables:', data);
+          setData(data);
+        } else {
+          setData([]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching or parsing CSV data:', error);
+      if (isTextValue) {
+        setData('');
+      } else {
+        setData([]);
+      }
+    }
+  };
+
+  // Function to fetch all data from Google Sheets on component mount
+  useEffect(() => {
+    console.log('Fetching all data from Google Sheets...');
+    const todayPricesUrl = getGoogleSheetCsvUrl(SHEET_ID, TODAY_PRICES_GID);
+    const textValueUrl = getGoogleSheetCsvUrl(SHEET_ID, TEXT_VALUE_GID);
+    const indexUrl = getGoogleSheetCsvUrl(SHEET_ID, INDEX_GID);
+    const topTurnoverUrl = getGoogleSheetCsvUrl(SHEET_ID, TOP_TURNOVER_GID);
+    const topVolumeUrl = getGoogleSheetCsvUrl(SHEET_ID, TOP_VOLUME_GID);
+
+    // Fetch all data
+    fetchCsvData(todayPricesUrl, setTodayPrices);
+    fetchCsvData(textValueUrl, setTextValue, true);
+    fetchCsvData(indexUrl, setIndexData);
+    fetchCsvData(topTurnoverUrl, setTopTurnoverData);
+    fetchCsvData(topVolumeUrl, setTopVolumeData);
   }, []); // Empty dependency array means this runs once on mount
 
   // Calculate holdings whenever transactions change
@@ -121,126 +223,6 @@ function App() {
     console.log('Holdings data calculated based on last transaction WACC:', calculatedHoldings);
 
   }, [transactions]); // Recalculate holdings when transactions change
-
-  // Modified addTransaction to send data to the backend and refetch
-  const addTransaction = async (transaction) => {
-    console.log('Attempting to add new transaction to backend:', transaction);
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(transaction),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log('Transaction added successfully:', result);
-
-        // After adding, refetch transactions to update the frontend state
-        fetchTransactions();
-
-    } catch (error) {
-        console.error('Error adding transaction to backend:', error);
-        // Optionally, handle displaying an error to the user
-    }
-  };
-
-  // Function to delete a transaction
-  const deleteTransaction = async (transactionId) => {
-      console.log(`Attempting to delete transaction with ID: ${transactionId} from backend...`);
-      try {
-          const response = await fetch(`${API_URL}/${transactionId}`, {
-              method: 'DELETE',
-          });
-
-          if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const result = await response.json();
-          console.log('Transaction deleted successfully:', result);
-
-          // After deleting, refetch transactions to update the frontend state
-          fetchTransactions();
-
-      } catch (error) {
-          console.error(`Error deleting transaction with ID: ${transactionId}`, error);
-          // Optionally, handle displaying an error to the user
-      }
-  };
-
-  // Function to fetch and parse CSV data from Google Sheets
-  const fetchCsvData = async (url, setData, isTextValue = false) => {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const text = await response.text();
-
-      console.log('Raw CSV data from Google Sheet:', text); // Log raw text
-
-      if (isTextValue) {
-           // For text value, split into rows and columns and get the G2 value (row 2, column 7)
-           const rows = text.split('\n').map(row => row.split(','));
-           if (rows.length > 1 && rows[1].length > 6) { // Check if row 2 and column G (index 6) exist
-               setData(rows[1][6].trim()); // Set the state with the G2 value
-           } else {
-               console.warn('G2 cell not found or sheet structure unexpected for text value GID.');
-               setData(''); // Set to empty string if G2 is not found
-           }
-      } else {
-        // Original parsing logic for tables (TodayPrices, NEPSE data)
-        const rows = text.split('\n').map(row => row.split(','));
-        if (rows.length > 1) {
-            const headers = rows[0];
-            const data = rows.slice(1).map(row => {
-                let obj = {};
-                headers.forEach((header, index) => {
-                    obj[header.trim()] = row[index] ? row[index].trim() : '';
-                });
-                return obj;
-            }).filter(obj => Object.values(obj).some(value => value !== ''));
-            console.log('Parsed CSV data for tables:', data);
-            setData(data);
-        } else {
-            setData([]);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching or parsing CSV data:', error);
-      if (isTextValue) {
-          setData(''); // Set to empty string on error for text value
-      } else {
-          setData([]); // Set to empty array on error for table data
-      }
-    }
-  };
-
-  // Function to fetch prices and text value from Google Sheets on component mount (still using sheets for this data)
-  useEffect(() => {
-    console.log('Fetching prices and other data from Google Sheets...'); // Updated log message
-    const todayPricesUrl = getGoogleSheetCsvUrl(SHEET_ID, TODAY_PRICES_GID);
-    const textValueUrl = getGoogleSheetCsvUrl(SHEET_ID, TEXT_VALUE_GID);
-
-    // URLs for new NEPSE data
-    const indexUrl = getGoogleSheetCsvUrl(SHEET_ID, INDEX_GID);
-    const topTurnoverUrl = getGoogleSheetCsvUrl(SHEET_ID, TOP_TURNOVER_GID);
-    const topVolumeUrl = getGoogleSheetCsvUrl(SHEET_ID, TOP_VOLUME_GID);
-
-    // Fetch data for all GIDs
-    fetchCsvData(todayPricesUrl, setTodayPrices);
-    fetchCsvData(textValueUrl, setTextValue, true); // Fetch text value and mark as such
-    fetchCsvData(indexUrl, setIndexData);
-    fetchCsvData(topTurnoverUrl, setTopTurnoverData);
-    fetchCsvData(topVolumeUrl, setTopVolumeData);
-
-  }, []); // Empty dependency array means this runs once on mount
 
   const renderTabContent = () => {
     switch (activeTab) {
