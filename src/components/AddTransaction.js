@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Papa from 'papaparse'; // Add Papa Parse for CSV parsing
 
 function AddTransaction({ onAddTransaction, transactions, holdings }) {
   const [company, setCompany] = useState('');
@@ -29,6 +30,9 @@ function AddTransaction({ onAddTransaction, transactions, holdings }) {
     // State to hold the calculated WACC for the selected company when type is Sell
     const [calculatedWacc, setCalculatedWacc] = useState(0); // Changed from fetchedWacc to calculatedWacc
 
+  // Add new state for CSV file
+  const [csvFile, setCsvFile] = useState(null);
+  const [csvError, setCsvError] = useState('');
 
   // Transaction Sources (Used for Buy and Sell Secondary)
   const transactionSources = [
@@ -204,6 +208,72 @@ function AddTransaction({ onAddTransaction, transactions, holdings }) {
 
   }, [quantity, price, type, transactionSource, holdingType, company, calculatedWacc]); // Rerun when these or calculatedWacc changes
 
+  // Add CSV parsing function
+  const handleCsvUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setCsvFile(file);
+      setCsvError('');
+
+      Papa.parse(file, {
+        complete: (results) => {
+          const transactions = results.data.slice(1); // Skip header row
+          let hasError = false;
+          let errorMessage = '';
+
+          transactions.forEach((row, index) => {
+            if (row.length < 5) {
+              hasError = true;
+              errorMessage = `Row ${index + 2} has insufficient data`;
+              return;
+            }
+
+            const [company, date, type, quantity, price] = row;
+            
+            // Validate data
+            if (!company || !date || !type || !quantity || !price) {
+              hasError = true;
+              errorMessage = `Row ${index + 2} has missing required fields`;
+              return;
+            }
+
+            // Validate type
+            if (type !== 'Buy' && type !== 'Sell') {
+              hasError = true;
+              errorMessage = `Row ${index + 2} has invalid transaction type`;
+              return;
+            }
+
+            // Create transaction object
+            const transaction = {
+              company: company.trim(),
+              date: date.trim(),
+              type: type.trim(),
+              quantity: parseFloat(quantity),
+              price: parseFloat(price),
+              transactionSource: type === 'Buy' ? 'Secondary' : 'Secondary',
+              holdingType: type === 'Sell' ? 'Short Term' : null
+            };
+
+            // Add transaction
+            onAddTransaction(transaction);
+          });
+
+          if (hasError) {
+            setCsvError(errorMessage);
+          } else {
+            setCsvFile(null);
+            event.target.value = ''; // Reset file input
+          }
+        },
+        header: true,
+        skipEmptyLines: true,
+        error: (error) => {
+          setCsvError(`Error parsing CSV: ${error.message}`);
+        }
+      });
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -302,6 +372,24 @@ function AddTransaction({ onAddTransaction, transactions, holdings }) {
   return (
     <div>
       <h2>Add New Transaction</h2>
+      
+      {/* Add CSV Upload Section */}
+      <div style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ccc', borderRadius: '5px' }}>
+        <h3>Import from CSV</h3>
+        <p style={{ fontSize: '0.9em', color: '#666', marginBottom: '10px' }}>
+          Upload a CSV file with the following columns: Company Symbol, Transaction Date, Type (Buy/Sell), Quantity, Price
+        </p>
+        <input
+          type="file"
+          accept=".csv"
+          onChange={handleCsvUpload}
+          style={{ marginBottom: '10px' }}
+        />
+        {csvError && (
+          <p style={{ color: 'red', fontSize: '0.9em' }}>{csvError}</p>
+        )}
+      </div>
+
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'flex', gap: '20px' }}>
           {/* Input Fields Section */}
