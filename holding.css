@@ -1,0 +1,1390 @@
+/* Holding page styles */
+@import url('./styles.css');
+
+/* Holding Container */
+.holding-container {
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+/* Header Section */
+.holding-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 24px 0;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-radius: 16px;
+  color: white;
+  margin: 0 0 24px 0;
+}
+
+.holding-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.holding-subtitle {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+/* Portfolio Summary */
+.portfolio-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.summary-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.summary-icon {
+  font-size: 36px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0fdf4;
+  border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.summary-content {
+  flex: 1;
+}
+
+.summary-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-content p {
+  margin: 0 0 4px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.change-indicator {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.change-indicator.positive {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.change-indicator.negative {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.change-indicator.neutral {
+  color: #6b7280;
+  background: rgba(107, 114, 128, 0.1);
+}
+
+/* Controls Section */
+.holding-controls {
+  margin-bottom: 32px;
+}
+
+.search-section {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  flex: 1;
+  min-width: 300px;
+  position: relative;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.search-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s;
+}
+
+.search-btn:hover {
+  background: #059669;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 10px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.filter-select:focus {
+  border-color: #10b981;
+}
+
+.refresh-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.refresh-btn:hover {
+  background: #059669;
+}
+
+.refresh-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Performance Section */
+.performance-section {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #111827;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.chart-btn {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.chart-btn:hover {
+  background: #f3f4f6;
+}
+
+.chart-btn.active {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.chart-container {
+  padding: 24px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+}
+
+/* Holdings List Container */
+.holdings-list-container {
+  background: rgb(175, 80, 80);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.list-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #111827;
+}
+
+.list-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.view-toggle {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.view-toggle:hover {
+  background: #f3f4f6;
+}
+
+.view-toggle.active {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.export-btn {
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.export-btn:hover {
+  background: #4f46e5;
+}
+
+/* Holdings List */
+.holdings-list {
+  padding: 24px;
+  min-height: 400px;
+  background-color: #ffffff;
+}
+
+.holdings-list.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 20px;
+}
+
+.holdings-list.list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Loading and Error States */
+.loading-state,
+.error-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  min-height: 300px;
+}
+
+.loading-spinner {
+  font-size: 48px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.loading-state h3,
+.error-state h3,
+.empty-state h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: #111827;
+}
+
+.loading-state p,
+.error-state p,
+.empty-state p {
+  margin: 0 0 24px 0;
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.retry-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.retry-btn:hover {
+  background: #059669;
+}
+
+/* Holding Cards - Dark Theme */
+.holding-card {
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #333;
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.holding-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-color: #000000;
+}
+
+.holding-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 12px 12px 0 0;
+}
+
+.holding-card.negative::before {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.holding-card.neutral::before {
+  background: linear-gradient(90deg, #6b7280, #4b5563);
+}
+
+/* Top Section */
+.holding-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  padding: 16px 20px;
+  border-radius: 8px 8px 0 0;
+  margin: -20px -20px 20px -20px;
+}
+
+.holding-symbol {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.5px;
+}
+
+.holding-name {
+  font-size: 14px;
+  color: #ffffff;
+  margin: 0;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.holding-value {
+  text-align: right;
+}
+
+.holding-value .current-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.holding-value .daily-change {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.holding-value .daily-change.positive {
+  color: #10b981;
+}
+
+.holding-value .daily-change.negative {
+  color: #ef4444;
+}
+
+.holding-value .daily-change.neutral {
+  color: #9ca3af;
+}
+
+/* Financial Metrics Grid - Updated for all table data */
+.holding-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* Net PnL in header */
+.net-pnl {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.net-pnl.positive {
+  color: #15ca15;
+}
+
+.net-pnl.negative {
+  color: #db2323;
+}
+
+.net-pnl.neutral {
+  color: #6b7280;
+}
+
+/* Detail Items */
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 600;
+}
+
+.detail-value.positive {
+  color: #15ca15;
+}
+
+.detail-value.negative {
+  color: #db2323;
+}
+
+.detail-value.neutral {
+  color: #9ca3af;
+}
+
+/* Bottom Section */
+.holding-summary {
+  border-top: 1px solid #333;
+  padding-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.summary-value.positive {
+  color: #10b981;
+}
+
+.summary-value.negative {
+  color: #ef4444;
+}
+
+/* List View Specific Styles */
+.holding-card.list-view {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+}
+
+.holding-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.holding-symbol {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.holding-name {
+  font-size: 14px;
+  color: #000000;
+  margin: 4px 0 0 0;
+}
+
+.holding-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+.holding-profit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.profit-amount {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.profit-percent {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.profit-positive {
+  color: #15ca15 !important;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.profit-negative {
+  color: #db2323 !important;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.profit-neutral {
+  color: #6b7280 !important;
+  background: rgba(107, 114, 128, 0.1);
+}
+
+.holding-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #424447;
+}
+
+.detail-item {
+  text-align: center;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* List View Specific Styles */
+.holding-card.list-view .holding-header {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.holding-card.list-view .holding-value {
+  font-size: 20px;
+  margin: 0 24px;
+}
+
+.holding-card.list-view .holding-profit {
+  margin-top: 0;
+  margin-right: 24px;
+}
+
+.holding-card.list-view .holding-details {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  gap: 24px;
+}
+
+/* Sector Allocation */
+.sector-allocation {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.allocation-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px;
+}
+
+.pie-chart-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background: #fafafa;
+  border-radius: 12px;
+}
+
+.sector-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sector-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.sector-item:hover {
+  background: #f3f4f6;
+}
+
+.sector-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sector-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.sector-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.sector-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.sector-percentage {
+  font-size: 12px;
+  color: #6b7280;
+  margin-left: 8px;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background-color: white;
+  margin: 5% auto;
+  padding: 0;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #111827;
+}
+
+.close {
+  color: #6b7280;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.close:hover {
+  color: #111827;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+/* Modal Detail Styles */
+.modal-holding-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.modal-price-section {
+  text-align: center;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.modal-current-price {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.modal-change {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.modal-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row .detail-label {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+  margin: 0;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.detail-row .detail-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+/* Holdings Table Styles */
+.holdings-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.holdings-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 14px;
+}
+
+.holdings-table thead {
+  background: #f8fafc;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.holdings-table th {
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.holdings-table tbody tr {
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.holdings-table tbody tr:hover {
+  background: #f9fafb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.holdings-table td {
+  padding: 16px 12px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+/* Profit/Loss Background Colors */
+.holding-row.profit-positive {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.holding-row.profit-positive:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.holding-row.profit-negative {
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.holding-row.profit-negative:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.holding-row.profit-neutral {
+  background: rgba(107, 114, 128, 0.05);
+}
+
+.holding-row.profit-neutral:hover {
+  background: rgba(107, 114, 128, 0.1);
+}
+
+/* Symbol Cell */
+.symbol-cell {
+  min-width: 150px;
+}
+
+.symbol-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.symbol-info strong {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.symbol-info small {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+/* PnL Cells */
+.pnl-cell {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.pnl-percent {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pnl-cell.profit-positive,
+.pnl-percent.profit-positive {
+  color: #10b981;
+}
+
+.pnl-cell.profit-negative,
+.pnl-percent.profit-negative {
+  color: #ef4444;
+}
+
+.pnl-cell.profit-neutral,
+.pnl-percent.profit-neutral {
+  color: #6b7280;
+}
+
+/* Table Column Widths */
+.holdings-table th:nth-child(1), /* Symbol */
+.holdings-table td:nth-child(1) {
+  min-width: 120px;
+}
+
+.holdings-table th:nth-child(2), /* Units */
+.holdings-table td:nth-child(2) {
+  min-width: 60px;
+  text-align: right;
+}
+
+.holdings-table th:nth-child(3), /* WACC */
+.holdings-table td:nth-child(3) {
+  min-width: 80px;
+  text-align: right;
+}
+
+.holdings-table th:nth-child(4), /* Investment */
+.holdings-table td:nth-child(4) {
+  min-width: 100px;
+  text-align: right;
+}
+
+.holdings-table th:nth-child(5), /* LTP */
+.holdings-table td:nth-child(5) {
+  min-width: 80px;
+  text-align: right;
+}
+
+.holdings-table th:nth-child(6), /* Value */
+.holdings-table td:nth-child(6) {
+  min-width: 100px;
+  text-align: right;
+}
+
+.holdings-table th:nth-child(7), /* Receivable */
+.holdings-table td:nth-child(7) {
+  min-width: 100px;
+  text-align: right;
+}
+
+.holdings-table th:nth-child(8), /* Net Pnl */
+.holdings-table td:nth-child(8) {
+  min-width: 90px;
+  text-align: right;
+}
+
+.holdings-table th:nth-child(9), /* Net Pnl% */
+.holdings-table td:nth-child(9) {
+  min-width: 80px;
+  text-align: right;
+}
+
+.holdings-table th:nth-child(10), /* Point Change */
+.holdings-table td:nth-child(10) {
+  min-width: 80px;
+  text-align: center;
+}
+
+.holdings-table th:nth-child(11), /* Change Value */
+.holdings-table td:nth-child(11) {
+  min-width: 90px;
+  text-align: right;
+}
+
+.holdings-table th:nth-child(12), /* Status */
+.holdings-table td:nth-child(12) {
+  min-width: 80px;
+  text-align: center;
+}
+
+.holdings-table th:nth-child(13), /* Overall PnL */
+.holdings-table td:nth-child(13) {
+  min-width: 100px;
+  text-align: right;
+}
+
+/* Responsive Table */
+@media (max-width: 1024px) {
+  .holdings-table {
+    font-size: 13px;
+  }
+  
+  .holdings-table th,
+  .holdings-table td {
+    padding: 12px 8px;
+  }
+  
+  .symbol-info strong {
+    font-size: 14px;
+  }
+  
+  .symbol-info small {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .holdings-table-container {
+    margin: 0 -24px;
+    border-radius: 0;
+  }
+  
+  .holdings-table {
+    font-size: 12px;
+  }
+  
+  .holdings-table th,
+  .holdings-table td {
+    padding: 10px 6px;
+  }
+  
+  .symbol-info strong {
+    font-size: 13px;
+  }
+  
+  .symbol-info small {
+    font-size: 10px;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .search-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-box {
+    min-width: auto;
+  }
+  
+  .filter-controls {
+    justify-content: space-between;
+  }
+  
+  .portfolio-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .holdings-list.grid-view {
+    grid-template-columns: 1fr;
+  }
+  
+  .list-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .allocation-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 10% auto;
+  }
+  
+  .modal-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .portfolio-summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .holding-card.list-view {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .holding-card.list-view .holding-value {
+    margin: 0;
+  }
+  
+  .holding-card.list-view .holding-profit {
+    margin: 0;
+  }
+  
+  .chart-controls {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .holding-card {
+    padding: 16px;
+  }
+  
+  .holding-symbol {
+    font-size: 20px;
+  }
+  
+  .holding-value .current-value {
+    font-size: 18px;
+  }
+  
+  .holding-details {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .detail-value {
+    font-size: 14px;
+  }
+  
+  .summary-value {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .holding-details {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .holding-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .holding-value {
+    text-align: left;
+  }
+}
+
+/* Daily Change Cell */
+.daily-change {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.daily-change.profit-positive {
+  color: #10b981;
+}
+
+.daily-change.profit-negative {
+  color: #ef4444;
+}
+
+.daily-change.profit-neutral {
+  color: #6b7280;
+}
+
+/* Status Badge */
+.status-cell {
+  text-align: center;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-badge.inactive {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.status-badge.suspended {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Overall PnL Cell */
+.overall-pnl {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.overall-pnl.profit-positive {
+  color: #10b981;
+}
+
+.overall-pnl.profit-negative {
+  color: #ef4444;
+}
+
+.overall-pnl.profit-neutral {
+  color: #6b7280;
+}
+
+/* Point Change and Change Value Cells */
+.point-change,
+.change-value {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Status Badge Updates */
+.status-badge.loss {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.status-badge.profit {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+

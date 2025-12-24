@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Wealth Engine</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo">
+                <h1>🚀 Wealth Engine</h1>
+                <p class="tagline">NEPSE Portfolio Tracker</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tab-navigation">
+        <div class="tab-container">
+            <a href="index.html" class="tab-btn">
+                <span class="tab-icon">🏠</span>
+                <span class="tab-label">Home</span>
+            </a>
+            <a href="portfolio.html" class="tab-btn">
+                <span class="tab-icon">💼</span>
+                <span class="tab-label">Portfolio</span>
+            </a>
+            <a href="dashboard.html" class="tab-btn active">
+                <span class="tab-icon">📊</span>
+                <span class="tab-label">Dashboard</span>
+            </a>
+            <a href="transactions.html" class="tab-btn">
+                <span class="tab-icon">📝</span>
+                <span class="tab-label">Transactions</span>
+            </a>
+            <a href="ltp.html" class="tab-btn">
+                <span class="tab-icon">📈</span>
+                <span class="tab-label">LTP</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            <div class="page-header">
+                <h2>📊 Dashboard</h2>
+                <p class="page-subtitle">Analytics and performance insights</p>
+            </div>
+
+            <div class="dashboard-container">
+                <!-- Dashboard content will be loaded here -->
+                <div class="loading-state">
+                    <div class="loading-spinner">⏳</div>
+                    <p>Loading dashboard data...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <p>&copy; <span id="current-year"></span> Wealth Engine. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
+
